@@ -13,7 +13,7 @@ namespace BDLanguageUpdater
         public string blackDesertFilesPath;
         public string userPreferencesFile;
         
-        private string zipFilePath;
+        private string downloadedFilePath;
         private string desktopPath;
 
         private string version;
@@ -25,7 +25,7 @@ namespace BDLanguageUpdater
 
             desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
 
-            zipFilePath = Path.Combine(desktopPath, Constants.ZIP_FILE_NAME);
+            downloadedFilePath = Path.Combine(desktopPath, Constants.DOWNLOADED_FILE_NAME);
 
             userPreferencesFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                                   Constants.USER_BLACK_DESERT_DIRECTORY_FILE);
@@ -90,7 +90,7 @@ namespace BDLanguageUpdater
 
         private void DownloadFile()
         {
-            var finalFileLink = Constants.ZIP_FILE_URL.Replace("###", version);
+            var finalFileLink = Constants.FILE_URL.Replace("###", version);
 
             this.label2.Text = $"Downloading files";
 
@@ -98,9 +98,9 @@ namespace BDLanguageUpdater
             {
                 try
                 {
-                    client.DownloadFileCompleted += (a, b) => ExtractFile();
+                    client.DownloadFileCompleted += (a, b) => ReplaceFile();
                     client.DownloadProgressChanged += (a, args) => RefreshProgressBar(args);
-                    client.DownloadFileAsync(new Uri(finalFileLink), zipFilePath);
+                    client.DownloadFileAsync(new Uri(finalFileLink), downloadedFilePath);
                 }
                 catch(Exception e)
                 {
@@ -112,26 +112,6 @@ namespace BDLanguageUpdater
         private void RefreshProgressBar(DownloadProgressChangedEventArgs args)
         {
             this.progressBar1.Value = args.ProgressPercentage;
-        }
-
-        private void ExtractFile()
-        {
-            this.label2.Text = $"Extracting files";
-
-            using (ZipArchive archive = ZipFile.OpenRead(zipFilePath))
-            {
-                var desiredFileName = Constants.BLACK_DESERT_LANGUAGE_FILE_NAME.Replace("##", "en");
-                foreach (ZipArchiveEntry entry in archive.Entries)
-                {
-                    if (entry.FullName != desiredFileName) continue;
-
-                    entry.ExtractToFile(Path.Combine(desktopPath, entry.FullName));
-                }
-            }
-
-            File.Delete(zipFilePath);
-
-            ReplaceFile();
         }
 
         private void ReplaceFile()
@@ -164,11 +144,11 @@ namespace BDLanguageUpdater
 
                 HttpResponseMessage response = await client.GetAsync(url);
                 response.EnsureSuccessStatusCode();
-                string responseBody = await response.Content.ReadAsStringAsync();
+                var responseBody = await response.Content.ReadAsStringAsync();
+                var numbers = GetStringNumbers(responseBody);
 
-                version = responseBody;
-
-                zipFilePath = zipFilePath.Replace("###", version);
+                version = numbers[2];
+                downloadedFilePath = downloadedFilePath.Replace("###", version);
 
                 callback?.Invoke();
 
@@ -180,6 +160,11 @@ namespace BDLanguageUpdater
             {
                 ShowError(e.Message);
             }
+        }
+
+        private string[] GetStringNumbers(string value)
+        {
+             return System.Text.RegularExpressions.Regex.Split(value, @"\D+");
         }
 
         private void progressBar1_Click(object sender, EventArgs e)
