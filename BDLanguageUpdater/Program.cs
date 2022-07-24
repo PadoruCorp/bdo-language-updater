@@ -45,11 +45,16 @@ namespace BDLanguageUpdater
 
             directoriesModel.downloadedFilePath = Path.Combine(directoriesModel.desktopPath, Constants.DOWNLOADED_FILE_NAME);
 
-            directoriesModel.userPreferencesFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                                  Constants.USER_PREFERENCES_FILE_NAME);
+            var appFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), Constants.APP_LOCAL_FOLDER);
 
-            directoriesModel.configFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                                  Constants.CONFIG_FILE_NAME);
+            if (!Directory.Exists(appFolder))
+            {
+                Directory.CreateDirectory(appFolder);
+            }
+
+            directoriesModel.userPreferencesFilePath = Path.Combine(appFolder, Constants.USER_PREFERENCES_FILE_NAME);
+
+            directoriesModel.configFilePath = Path.Combine(appFolder, Constants.CONFIG_FILE_NAME);
 
             return directoriesModel;
         }
@@ -63,6 +68,9 @@ namespace BDLanguageUpdater
                     regex = Constants.DEFAULT_REGEX,
                     versionUrl = Constants.DEFAULT_VERSION_URL,
                     fileUrl = Constants.DEFAULT_FILE_URL,
+                    stringToReplaceOnUrl = Constants.DEFAULT_STRING_TO_REPLACE_ON_URL,
+                    stringToReplaceOnFile = Constants.DEFAULT_STRING_TO_REPLACE_ON_FILE,
+                    versionNumberIndex = Constants.DEFAULT_VERSION_NUMBER_INDEX,
                 };
 
                 File.WriteAllText(directoriesModel.configFilePath, JsonConvert.SerializeObject(configFile));

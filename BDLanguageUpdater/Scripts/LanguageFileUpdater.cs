@@ -39,8 +39,8 @@ namespace BDLanguageUpdater.Scripts
                 var responseBody = await response.Content.ReadAsStringAsync();
                 var numbers = GetStringNumbers(responseBody);
 
-                version = numbers[2];
-                directoriesModel.downloadedFilePath = directoriesModel.downloadedFilePath.Replace("###", version);
+                version = numbers[configFile.versionNumberIndex];
+                directoriesModel.downloadedFilePath = directoriesModel.downloadedFilePath.Replace(configFile.stringToReplaceOnUrl, version);
 
                 DownloadFile();
 
@@ -56,7 +56,7 @@ namespace BDLanguageUpdater.Scripts
 
         private void DownloadFile()
         {
-            var finalFileLink = configFile.fileUrl.Replace("###", version);
+            var finalFileLink = configFile.fileUrl.Replace(configFile.stringToReplaceOnUrl, version);
 
             OnFileDownloadStart?.Invoke();
 
@@ -79,8 +79,8 @@ namespace BDLanguageUpdater.Scripts
         {
             OnFileReplaceStart?.Invoke();
 
-            var oldFile = Path.Combine(directoriesModel.blackDesertFilesPath, Constants.BLACK_DESERT_LANGUAGE_FILE_NAME.Replace("##", "es"));
-            var newFile = Path.Combine(directoriesModel.desktopPath, Constants.BLACK_DESERT_LANGUAGE_FILE_NAME.Replace("##", "en"));
+            var oldFile = Path.Combine(directoriesModel.blackDesertFilesPath, Constants.BLACK_DESERT_LANGUAGE_FILE_NAME.Replace(Constants.DEFAULT_STRING_TO_REPLACE_ON_FILE, "es"));
+            var newFile = Path.Combine(directoriesModel.desktopPath, Constants.BLACK_DESERT_LANGUAGE_FILE_NAME.Replace(Constants.DEFAULT_STRING_TO_REPLACE_ON_FILE, "en"));
 
             File.Delete(oldFile);
 
