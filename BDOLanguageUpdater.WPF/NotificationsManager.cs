@@ -2,7 +2,9 @@
 using System.Threading.Tasks;
 using BDLanguageUpdater.Service;
 using Microsoft.Extensions.Hosting;
+#if ON_W10
 using Microsoft.Toolkit.Uwp.Notifications;
+#endif
 
 namespace BDOLanguageUpdater.WPF;
 
@@ -25,9 +27,11 @@ public class NotificationsManager : BackgroundService
 
     private void LanguageFileUpdaterOnOnUpdateFinish()
     {
+#if ON_W10
         new ToastContentBuilder()
             .AddText("BDO Language Updater")
             .AddText("Client language updated!")
             .Show();
+#endif
     }
 }

@@ -1,11 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <OutputType>WinExe</OutputType>
-        <TargetFramework>net7.0-windows10.0.17763.0</TargetFramework>
+        <TargetFrameworks>net7.0;net7.0-windows10.0.17763.0</TargetFrameworks>
         <Nullable>enable</Nullable>
         <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
         <ApplicationManifest>app.manifest</ApplicationManifest>
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+        <DefineConstants Condition=" '$(TargetFramework)' == 'net7.0-windows10.0.17763.0' ">ON_W10</DefineConstants>
     </PropertyGroup>
 
     <ItemGroup>
