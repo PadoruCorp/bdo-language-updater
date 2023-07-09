@@ -2,6 +2,9 @@
 
 class Constants
 {
+    // Updater
+    public const string HTTP_CLIENT_NAME = "bdo-language-updater";
+    
     // Defaults
     public const string DEFAULT_VERSION_URL = "http://dn.sea.playblackdesert.com/UploadData/ads_files";
     public const string DEFAULT_FILE_URL = "http://dn.sea.playblackdesert.com/UploadData/ads/languagedata_en/###/languagedata_en.loc";

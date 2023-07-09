@@ -14,58 +14,57 @@ public class LanguageFileUpdater
     private ILogger<LanguageUpdaterService> logger;
     private UrlMetadataOptions urlMetadataOptions;
     private UserPreferencesOptions userPreferencesOptions;
+    private readonly HttpClient httpClient;
     private string version;
     private string downloadedFilePath;
     private string blackDesertFilesPath;
     private string desktopPath;
 
-    public LanguageFileUpdater(ILogger<LanguageUpdaterService> logger, IOptionsSnapshot<UrlMetadataOptions> urlMetadataOptions, IOptionsSnapshot<UserPreferencesOptions> userPreferencesOptions)
+    public LanguageFileUpdater(
+        ILogger<LanguageUpdaterService> logger,
+        IOptionsSnapshot<UrlMetadataOptions> urlMetadataOptions,
+        IOptionsSnapshot<UserPreferencesOptions> userPreferencesOptions,
+        IHttpClientFactory httpClientFactory)
     {
         this.logger = logger;
         this.urlMetadataOptions = urlMetadataOptions.Value;
         this.userPreferencesOptions = userPreferencesOptions.Value;
-
+        this.httpClient = httpClientFactory.CreateClient(Constants.HTTP_CLIENT_NAME);
+        
         InitializePaths();
     }
 
     public async Task UpdateFile()
     {
-        try
+        if (!Directory.Exists(blackDesertFilesPath))
         {
-            if (!Directory.Exists(blackDesertFilesPath))
-            {
-                logger.LogError($"Cannot download file for unexisting path: {blackDesertFilesPath}");
-                return;
-            }
-
-            var version = await GetVersion();
-
-            downloadedFilePath = downloadedFilePath.Replace(urlMetadataOptions.StringToReplaceOnUrl, version);
-
-            await DownloadFile();
-
-            MoveFile();
+            logger.LogError($"Cannot download file for unexisting path: {blackDesertFilesPath}");
+            return;
         }
-        catch (HttpRequestException e)
-        {
-            logger.LogError(e.Message);
-        }
+
+        var version = await GetVersion();
+
+        downloadedFilePath = downloadedFilePath.Replace(urlMetadataOptions.StringToReplaceOnUrl, version);
+
+        await DownloadFile();
+
+        MoveFile();
     }
 
     private async Task<string> GetVersion()
     {
-        var client = new HttpClient();
-
-        var response = await client.GetAsync(urlMetadataOptions.VersionUrl);
-        response.EnsureSuccessStatusCode();
+        var response = await this.httpClient.GetAsync(urlMetadataOptions.VersionUrl);
+        
+        if (!response.IsSuccessStatusCode)
+        {
+            this.logger.LogError("Language version metadata download failed. Error: {statusCode}", response.StatusCode);
+            throw new HttpRequestException($"Language version metadata download failed. Error: {response.StatusCode}");
+        }
+        
         var responseBody = await response.Content.ReadAsStringAsync();
         var numbers = GetStringNumbers(responseBody);
 
         version = numbers[urlMetadataOptions.VersionNumberIndex];
-
-        // Need to call dispose on the HttpClient object
-        // when done using it, so the app doesn't leak resources
-        client.Dispose();
 
         return version;
     }
@@ -74,19 +73,16 @@ public class LanguageFileUpdater
     {
         var finalFileLink = urlMetadataOptions.FileUrl.Replace(urlMetadataOptions.StringToReplaceOnUrl, version);
 
-        var client = new WebClient();
+        var response = await this.httpClient.GetAsync(new Uri(finalFileLink));
 
-        var downloadFinished = false;
-
-        client.DownloadFileCompleted += (a, b) => downloadFinished = true;
-        client.DownloadFileAsync(new Uri(finalFileLink), downloadedFilePath);
-
-        while (!downloadFinished)
+        if (!response.IsSuccessStatusCode)
         {
-            await Task.Yield();
+            this.logger.LogError("Language file download failed. Error: {statusCode}", response.StatusCode);
+            throw new HttpRequestException($"Language file download failed. Error: {response.StatusCode}");
         }
 
-        client.Dispose();
+        await using var fs = new FileStream(downloadedFilePath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.None);
+        await response.Content.CopyToAsync(fs);
     }
 
     private void MoveFile()

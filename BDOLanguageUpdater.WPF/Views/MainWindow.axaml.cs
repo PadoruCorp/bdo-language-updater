@@ -11,7 +11,8 @@ public partial class MainWindow : Window
     private readonly LanguageFileWatcher watcher;
     private readonly IWritableOptions<UserPreferencesOptions> userPreferencesOptions;
 
-    public MainWindow(MainWindowViewModel viewModel, LanguageFileWatcher watcher, IWritableOptions<UserPreferencesOptions> userPreferencesOptions)
+    public MainWindow(MainWindowViewModel viewModel, LanguageFileWatcher watcher,
+        IWritableOptions<UserPreferencesOptions> userPreferencesOptions)
     {
         InitializeComponent();
 
@@ -20,8 +21,6 @@ public partial class MainWindow : Window
         this.watcher = watcher;
         this.userPreferencesOptions = userPreferencesOptions;
     }
-
-    public LanguageUpdaterService Service { get; }
 
     private async void Browse(object sender, RoutedEventArgs args)
     {
@@ -35,18 +34,14 @@ public partial class MainWindow : Window
             AllowMultiple = false
         });
 
-        if (files.Count >= 1)
-        {
-            // Open reading stream from the first file.
-            var storageFolder = files[0];
+        if (files.Count < 1) return;
+        
+        // Open reading stream from the first file.
+        var storageFolder = files[0];
 
-            var path = storageFolder.Path.AbsolutePath;
+        var path = storageFolder.Path.LocalPath;
 
-            watcher.SetPath(path);
-            userPreferencesOptions.Update((options) =>
-            {
-                options.BDOClientPath = path;
-            });
-        }
+        watcher.SetPath(path);
+        userPreferencesOptions.Update(options => { options.BDOClientPath = path; });
     }
 }

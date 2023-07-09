@@ -39,7 +39,7 @@ public class LanguageUpdaterService : BackgroundService
 
                 logger.LogInformation("Updating file: {time}", DateTimeOffset.Now);
 
-                using var scope = serviceProvider.CreateAsyncScope();
+                await using var scope = serviceProvider.CreateAsyncScope();
                 var fileUpdater = scope.ServiceProvider.GetRequiredService<LanguageFileUpdater>();
 
                 await fileUpdater.UpdateFile();

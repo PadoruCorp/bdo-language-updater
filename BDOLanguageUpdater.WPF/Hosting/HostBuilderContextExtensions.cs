@@ -11,6 +11,8 @@ public static class HostBuilderContextExtensions
     public static void RegisterServices(this HostBuilderContext context, IServiceCollection services)
     {
         // Language Updater
+        services.RegisterUpdaterServices();
+        
         services.AddHostedService((sp) => sp.GetRequiredService<LanguageUpdaterService>());
         services.AddSingleton<LanguageUpdaterService>();
         
