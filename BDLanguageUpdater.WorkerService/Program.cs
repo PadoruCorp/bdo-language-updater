@@ -5,6 +5,7 @@ IHost host = Host.CreateDefaultBuilder(args)
     {
         services.AddHostedService<Worker>();
 
+        services.AddSingleton<LanguageFileUpdater>();
         services.ConfigureWritable<UserPreferencesOptions>(ctx.Configuration.GetSection(UserPreferencesOptions.UserPreferences));
         services.ConfigureWritable<UrlMetadataOptions>(ctx.Configuration.GetSection(UrlMetadataOptions.UrlMetadata));
     })

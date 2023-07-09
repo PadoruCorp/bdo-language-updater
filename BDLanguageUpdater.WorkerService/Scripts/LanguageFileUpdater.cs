@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using Microsoft.Extensions.Options;
+using System.Net;
 using System.Text.RegularExpressions;
 
 namespace BDLanguageUpdater.WorkerService;
@@ -18,11 +19,11 @@ public class LanguageFileUpdater
     public event Action OnUpdateFinish;
     public event Action<DownloadProgressChangedEventArgs> OnDownloadProgressChanged;
 
-    public LanguageFileUpdater(ILogger<Worker> logger, UrlMetadataOptions urlMetadataOptions, UserPreferencesOptions userPreferencesOptions)
+    public LanguageFileUpdater(ILogger<Worker> logger, IOptions<UrlMetadataOptions> urlMetadataOptions, IOptions<UserPreferencesOptions> userPreferencesOptions)
     {
         this.logger = logger;
-        this.urlMetadataOptions = urlMetadataOptions;
-        this.userPreferencesOptions = userPreferencesOptions;
+        this.urlMetadataOptions = urlMetadataOptions.Value;
+        this.userPreferencesOptions = userPreferencesOptions.Value;
 
         InitializePaths();
     }
