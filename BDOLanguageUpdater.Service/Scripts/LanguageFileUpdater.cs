@@ -19,12 +19,7 @@ public class LanguageFileUpdater
     private string blackDesertFilesPath;
     private string desktopPath;
 
-    public event Action OnFileDownloadStart;
-    public event Action OnFileReplaceStart;
-    public event Action OnUpdateFinish;
-    public event Action<DownloadProgressChangedEventArgs> OnDownloadProgressChanged;
-
-    public LanguageFileUpdater(ILogger<LanguageUpdaterService> logger, IOptions<UrlMetadataOptions> urlMetadataOptions, IOptions<UserPreferencesOptions> userPreferencesOptions)
+    public LanguageFileUpdater(ILogger<LanguageUpdaterService> logger, IOptionsSnapshot<UrlMetadataOptions> urlMetadataOptions, IOptionsSnapshot<UserPreferencesOptions> userPreferencesOptions)
     {
         this.logger = logger;
         this.urlMetadataOptions = urlMetadataOptions.Value;
@@ -37,6 +32,12 @@ public class LanguageFileUpdater
     {
         try
         {
+            if (!Directory.Exists(blackDesertFilesPath))
+            {
+                logger.LogError($"Cannot download file for unexisting path: {blackDesertFilesPath}");
+                return;
+            }
+
             var version = await GetVersion();
 
             downloadedFilePath = downloadedFilePath.Replace(urlMetadataOptions.StringToReplaceOnUrl, version);
@@ -53,9 +54,9 @@ public class LanguageFileUpdater
 
     private async Task<string> GetVersion()
     {
-        HttpClient client = new HttpClient();
+        var client = new HttpClient();
 
-        HttpResponseMessage response = await client.GetAsync(urlMetadataOptions.VersionUrl);
+        var response = await client.GetAsync(urlMetadataOptions.VersionUrl);
         response.EnsureSuccessStatusCode();
         var responseBody = await response.Content.ReadAsStringAsync();
         var numbers = GetStringNumbers(responseBody);
@@ -73,14 +74,11 @@ public class LanguageFileUpdater
     {
         var finalFileLink = urlMetadataOptions.FileUrl.Replace(urlMetadataOptions.StringToReplaceOnUrl, version);
 
-        OnFileDownloadStart?.Invoke();
-
         var client = new WebClient();
 
         var downloadFinished = false;
 
         client.DownloadFileCompleted += (a, b) => downloadFinished = true;
-        client.DownloadProgressChanged += (a, args) => OnDownloadProgressChanged?.Invoke(args);
         client.DownloadFileAsync(new Uri(finalFileLink), downloadedFilePath);
 
         while (!downloadFinished)
@@ -93,8 +91,6 @@ public class LanguageFileUpdater
 
     private void MoveFile()
     {
-        OnFileReplaceStart?.Invoke();
-
         var oldFile = Path.Combine(blackDesertFilesPath, Constants.BLACK_DESERT_LANGUAGE_FILE_NAME.Replace(Constants.DEFAULT_STRING_TO_REPLACE_ON_FILE, "es"));
         var newFile = Path.Combine(desktopPath, Constants.BLACK_DESERT_LANGUAGE_FILE_NAME.Replace(Constants.DEFAULT_STRING_TO_REPLACE_ON_FILE, "en"));
 
@@ -103,8 +99,6 @@ public class LanguageFileUpdater
         File.Copy(newFile, oldFile);
 
         File.Delete(newFile);
-
-        OnUpdateFinish?.Invoke();
     }
 
     private string[] GetStringNumbers(string value)
@@ -120,12 +114,5 @@ public class LanguageFileUpdater
         downloadedFilePath = Path.Combine(desktopPath, Constants.DOWNLOADED_FILE_NAME);
 
         blackDesertFilesPath = Path.Combine(userPreferencesOptions.BDOClientPath, Constants.BLACK_DESERT_LANGUAGE_FILES_PATH);
-
-        var appFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), Constants.APP_LOCAL_FOLDER);
-
-        if (!Directory.Exists(appFolder))
-        {
-            Directory.CreateDirectory(appFolder);
-        }
     }
 }

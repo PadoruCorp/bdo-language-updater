@@ -1,15 +1,27 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
+using BDLanguageUpdater.Service;
+using BDOLanguageUpdater.WPF.ViewModels;
 
 namespace BDOLanguageUpdater.WPF.Views;
 
 public partial class MainWindow : Window
 {
-    public MainWindow()
+    private readonly LanguageFileWatcher watcher;
+    private readonly IWritableOptions<UserPreferencesOptions> userPreferencesOptions;
+
+    public MainWindow(MainWindowViewModel viewModel, LanguageFileWatcher watcher, IWritableOptions<UserPreferencesOptions> userPreferencesOptions)
     {
         InitializeComponent();
+
+        DataContext = viewModel;
+
+        this.watcher = watcher;
+        this.userPreferencesOptions = userPreferencesOptions;
     }
+
+    public LanguageUpdaterService Service { get; }
 
     private async void Browse(object sender, RoutedEventArgs args)
     {
@@ -29,6 +41,12 @@ public partial class MainWindow : Window
             var storageFolder = files[0];
 
             var path = storageFolder.Path.AbsolutePath;
+
+            watcher.SetPath(path);
+            userPreferencesOptions.Update((options) =>
+            {
+                options.BDOClientPath = path;
+            });
         }
     }
 }

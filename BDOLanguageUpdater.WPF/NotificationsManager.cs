@@ -11,13 +11,13 @@ namespace BDOLanguageUpdater.WPF;
 /// <summary>
 /// This notifications manager needs to be a <see cref="BackgroundService"/>
 /// in order to be automatically instantiated and registered to the
-/// <see cref="LanguageFileUpdater"/> events.
+/// <see cref="LanguageUpdaterService"/> events.
 /// </summary>
 public class NotificationsManager : BackgroundService
 {
-    public NotificationsManager(LanguageFileUpdater languageFileUpdater)
+    public NotificationsManager(LanguageUpdaterService languageUpdaterService)
     {
-        languageFileUpdater.OnUpdateFinish += LanguageFileUpdaterOnOnUpdateFinish;
+        languageUpdaterService.OnFileUpdateFinish += LanguageFileUpdaterOnOnUpdateFinish;
     }
     
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
