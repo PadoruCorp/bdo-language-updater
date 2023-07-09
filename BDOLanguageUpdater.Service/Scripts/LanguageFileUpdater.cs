@@ -1,12 +1,17 @@
-﻿using Microsoft.Extensions.Options;
+﻿using System;
+using System.IO;
+using Microsoft.Extensions.Options;
 using System.Net;
+using System.Net.Http;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
-namespace BDLanguageUpdater.WorkerService;
+namespace BDLanguageUpdater.Service;
 
 public class LanguageFileUpdater
 {
-    private ILogger<Worker> logger;
+    private ILogger<LanguageUpdaterService> logger;
     private UrlMetadataOptions urlMetadataOptions;
     private UserPreferencesOptions userPreferencesOptions;
     private string version;
@@ -19,7 +24,7 @@ public class LanguageFileUpdater
     public event Action OnUpdateFinish;
     public event Action<DownloadProgressChangedEventArgs> OnDownloadProgressChanged;
 
-    public LanguageFileUpdater(ILogger<Worker> logger, IOptions<UrlMetadataOptions> urlMetadataOptions, IOptions<UserPreferencesOptions> userPreferencesOptions)
+    public LanguageFileUpdater(ILogger<LanguageUpdaterService> logger, IOptions<UrlMetadataOptions> urlMetadataOptions, IOptions<UserPreferencesOptions> userPreferencesOptions)
     {
         this.logger = logger;
         this.urlMetadataOptions = urlMetadataOptions.Value;

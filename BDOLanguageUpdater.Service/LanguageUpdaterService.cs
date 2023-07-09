@@ -1,15 +1,23 @@
-namespace BDLanguageUpdater.WorkerService;
+using System;
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Microsoft.Toolkit.Uwp.Notifications;
 
-public class Worker : BackgroundService
+namespace BDLanguageUpdater.Service;
+
+public class LanguageUpdaterService : BackgroundService
 {
-    private readonly ILogger<Worker> logger;
+    private readonly ILogger<LanguageUpdaterService> logger;
     private readonly IWritableOptions<UrlMetadataOptions> urlMetadataOptions;
     private readonly IWritableOptions<UserPreferencesOptions> userPreferencesOptions;
     private readonly LanguageFileUpdater fileUpdater;
     private FileSystemWatcher watcher;
     private bool hasToUpdateFile;
 
-    public Worker(ILogger<Worker> logger,
+    public LanguageUpdaterService(ILogger<LanguageUpdaterService> logger,
                   IWritableOptions<UrlMetadataOptions> urlMetadataOptions,
                   IWritableOptions<UserPreferencesOptions> userPreferencesOptions,
                   LanguageFileUpdater fileUpdater)

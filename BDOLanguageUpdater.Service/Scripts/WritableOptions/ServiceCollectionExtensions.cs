@@ -1,6 +1,9 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 
-namespace BDLanguageUpdater.WorkerService;
+namespace BDLanguageUpdater.Service;
 
 public static class ServiceCollectionExtensions
 {

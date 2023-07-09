@@ -1,4 +1,4 @@
-﻿namespace BDLanguageUpdater.WorkerService;
+﻿namespace BDLanguageUpdater.Service;
 
 public class UserPreferencesOptions
 {
