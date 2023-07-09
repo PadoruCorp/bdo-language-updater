@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>dotnet-BDLanguageUpdater.WorkerService-6417340f-5920-4e73-9d91-379e37814117</UserSecretsId>
+    <RootNamespace>BDLanguageUpdater.WorkerService</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

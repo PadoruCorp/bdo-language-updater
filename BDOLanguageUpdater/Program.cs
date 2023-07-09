@@ -1,5 +1,4 @@
 ﻿using BDLanguageUpdater.Scripts;
-using Newtonsoft.Json;
 using System;
 using System.IO;
 using System.Windows.Forms;

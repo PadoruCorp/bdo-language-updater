@@ -7,7 +7,7 @@
     <ProjectGuid>{89C96E87-6512-499E-A6D4-114FECB00773}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <RootNamespace>BDLanguageUpdater</RootNamespace>
-    <AssemblyName>BDLanguageUpdater</AssemblyName>
+    <AssemblyName>BDOLanguageUpdater</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
