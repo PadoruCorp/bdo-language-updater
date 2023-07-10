@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using Microsoft.Extensions.Options;
-using System.Net;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -13,9 +12,8 @@ public class LanguageFileUpdater
 {
     private ILogger<LanguageUpdaterService> logger;
     private UrlMetadataOptions urlMetadataOptions;
-    private UserPreferencesOptions userPreferencesOptions;
     private readonly HttpClient httpClient;
-    private string version;
+    private string? version;
     private string downloadedFilePath;
     private string blackDesertFilesPath;
     private string desktopPath;
@@ -28,10 +26,11 @@ public class LanguageFileUpdater
     {
         this.logger = logger;
         this.urlMetadataOptions = urlMetadataOptions.Value;
-        this.userPreferencesOptions = userPreferencesOptions.Value;
         this.httpClient = httpClientFactory.CreateClient(Constants.HTTP_CLIENT_NAME);
         
-        InitializePaths();
+        desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+        downloadedFilePath = Path.Combine(desktopPath, Constants.DOWNLOADED_FILE_NAME);
+        blackDesertFilesPath = Path.Combine(userPreferencesOptions.Value.BDOClientPath, Constants.BLACK_DESERT_LANGUAGE_FILES_PATH);
     }
 
     public async Task UpdateFile()
@@ -42,9 +41,9 @@ public class LanguageFileUpdater
             return;
         }
 
-        var version = await GetVersion();
+        var latestVersion = await GetVersion();
 
-        downloadedFilePath = downloadedFilePath.Replace(urlMetadataOptions.StringToReplaceOnUrl, version);
+        downloadedFilePath = downloadedFilePath.Replace(urlMetadataOptions.StringToReplaceOnUrl, latestVersion);
 
         await DownloadFile();
 
@@ -101,14 +100,5 @@ public class LanguageFileUpdater
     {
         var numbers = Regex.Split(value, urlMetadataOptions.Regex);
         return numbers;
-    }
-
-    private void InitializePaths()
-    {
-        desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-
-        downloadedFilePath = Path.Combine(desktopPath, Constants.DOWNLOADED_FILE_NAME);
-
-        blackDesertFilesPath = Path.Combine(userPreferencesOptions.BDOClientPath, Constants.BLACK_DESERT_LANGUAGE_FILES_PATH);
     }
 }

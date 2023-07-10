@@ -8,9 +8,8 @@ namespace BDLanguageUpdater.Service;
 public class LanguageFileWatcher
 {
     private readonly ILogger<LanguageUpdaterService> logger;
-    private FileSystemWatcher watcher;
-
-    public Action OnFileChanged;
+    private FileSystemWatcher? watcher;
+    public Action? OnFileChanged;
 
     public LanguageFileWatcher(ILogger<LanguageUpdaterService> logger, IOptionsSnapshot<UserPreferencesOptions> userPreferencesOptions)
     {

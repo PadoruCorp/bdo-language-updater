@@ -1,3 +1,4 @@
+using System;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
@@ -26,6 +27,8 @@ public partial class MainWindow : Window
     {
         // Get top level from the current control. Alternatively, you can use Window reference instead.
         var topLevel = GetTopLevel(this);
+
+        if (topLevel is null) throw new InvalidOperationException();
 
         // Start async operation to open the dialog.
         var files = await topLevel.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions()

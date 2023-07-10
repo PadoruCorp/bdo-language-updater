@@ -14,8 +14,8 @@ public class LanguageUpdaterService : BackgroundService
     private readonly IServiceProvider serviceProvider;
     private bool hasToUpdateFile;
 
-    public event Action OnFileUpdateStart;
-    public event Action OnFileUpdateFinish;
+    public event Action? OnFileUpdateStart;
+    public event Action? OnFileUpdateFinish;
 
     public LanguageUpdaterService(ILogger<LanguageUpdaterService> logger,
                   IWritableOptions<UserPreferencesOptions> userPreferencesOptions,

@@ -15,8 +15,9 @@ public static class ServiceCollectionExtensions
         services.Configure<T>(section);
         services.AddTransient<IWritableOptions<T>>(provider =>
         {
-            var environment = provider.GetService<IHostingEnvironment>();
-            var options = provider.GetService<IOptionsMonitor<T>>();
+            var environment = provider.GetRequiredService<IHostEnvironment>();
+            var options = provider.GetRequiredService<IOptionsMonitor<T>>();
+
             return new WritableOptions<T>(environment, options, section.Key, file);
         });
     }

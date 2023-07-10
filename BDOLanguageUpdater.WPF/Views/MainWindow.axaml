@@ -6,7 +6,7 @@
         mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="250"
         x:Class="BDOLanguageUpdater.WPF.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
-        Title="BDOLanguageUpdater.WPF">
+        Title="BDOLanguageUpdater">
 
     <Design.DataContext>
         <vm:MainWindowViewModel/>
