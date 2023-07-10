@@ -11,21 +11,12 @@ public static class HostBuilderContextExtensions
     public static void RegisterServices(this HostBuilderContext context, IServiceCollection services)
     {
         // Language Updater
-        services.RegisterUpdaterServices();
-        
-        services.AddHostedService((sp) => sp.GetRequiredService<LanguageUpdaterService>());
-        services.AddSingleton<LanguageUpdaterService>();
-        
-        services.AddSingleton<LanguageFileWatcher>();
-        services.AddScoped<LanguageFileUpdater>();
-        services.AddHostedService<NotificationsManager>();
-        
+        services.RegisterUpdaterServices(context);
+
         // UI
         services.AddSingleton<MainWindow>();
         services.AddSingleton<MainWindowViewModel>();
-
-        // Options
-        services.ConfigureWritable<UserPreferencesOptions>(context.Configuration.GetSection(UserPreferencesOptions.UserPreferences));
-        services.ConfigureWritable<UrlMetadataOptions>(context.Configuration.GetSection(UrlMetadataOptions.UrlMetadata));
+        
+        services.AddHostedService<NotificationsManager>();
     }
 }
