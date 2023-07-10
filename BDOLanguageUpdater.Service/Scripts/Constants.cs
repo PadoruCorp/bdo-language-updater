@@ -4,6 +4,7 @@ class Constants
 {
     // Updater
     public const string HTTP_CLIENT_NAME = "bdo-language-updater";
+    public const string LOGS_FILE_NAME = "logs.txt";
     
     // Defaults
     public const string DEFAULT_VERSION_URL = "http://dn.sea.playblackdesert.com/UploadData/ads_files";

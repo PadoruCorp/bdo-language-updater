@@ -1,7 +1,7 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using BDOLanguageUpdater.WPF.Hosting;
+using BDLanguageUpdater.Service;
 using BDOLanguageUpdater.WPF.Views;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -15,6 +15,7 @@ public class App : Application
     public App()
     {
         this.host = Host.CreateDefaultBuilder()
+            .UseSerilog()
             .ConfigureServices((context, services) => { context.RegisterServices(services); })
             .Build();
     }
