@@ -3,7 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 
-namespace BDLanguageUpdater.Service;
+namespace BDOLanguageUpdater.Service;
 
 public static class ServiceCollectionExtensions
 {

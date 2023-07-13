@@ -3,7 +3,7 @@ using Microsoft.Extensions.Hosting;
 using Serilog;
 using Serilog.Events;
 
-namespace BDLanguageUpdater.Service;
+namespace BDOLanguageUpdater.Service;
 
 public static class HostBuilderExtensions
 {

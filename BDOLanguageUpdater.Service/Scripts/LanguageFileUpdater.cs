@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
-namespace BDLanguageUpdater.Service;
+namespace BDOLanguageUpdater.Service;
 
 public class LanguageFileUpdater
 {

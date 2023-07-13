@@ -3,7 +3,7 @@ using Microsoft.Extensions.Options;
 using System;
 using System.IO;
 
-namespace BDLanguageUpdater.Service;
+namespace BDOLanguageUpdater.Service;
 
 public class LanguageFileWatcher
 {

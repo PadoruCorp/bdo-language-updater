@@ -2,7 +2,7 @@ using System;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
-using BDLanguageUpdater.Service;
+using BDOLanguageUpdater.Service;
 using BDOLanguageUpdater.WPF.ViewModels;
 
 namespace BDOLanguageUpdater.WPF.Views;

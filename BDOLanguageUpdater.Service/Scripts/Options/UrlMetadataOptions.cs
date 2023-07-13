@@ -1,4 +1,4 @@
-﻿namespace BDLanguageUpdater.Service;
+﻿namespace BDOLanguageUpdater.Service;
 
 public class UrlMetadataOptions
 {

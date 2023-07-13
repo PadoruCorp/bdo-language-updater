@@ -1,4 +1,4 @@
-using BDLanguageUpdater.Service;
+using BDOLanguageUpdater.Service;
 using BDOLanguageUpdater.WPF.ViewModels;
 using BDOLanguageUpdater.WPF.Views;
 using Microsoft.Extensions.DependencyInjection;

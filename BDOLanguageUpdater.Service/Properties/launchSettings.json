@@ -1,6 +1,6 @@
 ﻿{
   "profiles": {
-    "BDLanguageUpdater.WorkerService": {
+    "BDOLanguageUpdater.Service": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "environmentVariables": {

@@ -3,8 +3,7 @@
   <PropertyGroup>
     <TargetFrameworK>net7.0</TargetFrameworK>
     <Nullable>enable</Nullable>
-    <UserSecretsId>dotnet-BDLanguageUpdater.WorkerService-6417340f-5920-4e73-9d91-379e37814117</UserSecretsId>
-    <RootNamespace>BDLanguageUpdater.WorkerService</RootNamespace>
+    <RootNamespace>BDOLanguageUpdater.Service</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

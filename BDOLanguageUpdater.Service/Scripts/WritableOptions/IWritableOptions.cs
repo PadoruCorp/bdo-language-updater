@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.Extensions.Options;
 
-namespace BDLanguageUpdater.Service;
+namespace BDOLanguageUpdater.Service;
 
 public interface IWritableOptions<out T> : IOptionsSnapshot<T> where T : class, new()
 {
