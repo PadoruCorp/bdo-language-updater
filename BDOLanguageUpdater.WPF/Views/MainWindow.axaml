@@ -6,7 +6,10 @@
         mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="250"
         x:Class="BDOLanguageUpdater.WPF.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
-        Title="BDOLanguageUpdater">
+        Title="BDO Language Updater"
+        Width="700"
+        Height="400"
+        Icon="/Assets/icon.ico">
 
     <Design.DataContext>
         <vm:MainWindowViewModel/>
@@ -15,10 +18,10 @@
     <TabControl>
 		
         <TabItem Header="General" >
-            <StackPanel DataContext="{Binding GeneralTabViewModel}" Orientation="Horizontal" Spacing="10" Margin="0,5">
-                <TextBlock Text="BDO Path:"  TextAlignment="Right" VerticalAlignment="Center"/>
-                <TextBox Text="{Binding BDOPath}"  Watermark="C:\Steam\steamapps\common\Black Desert Online" VerticalAlignment="Center"/>
-                <Button Content="Browse" Click="Browse" VerticalAlignment="Center"/>
+            <StackPanel DataContext="{Binding GeneralTabViewModel}" Orientation="Horizontal" Spacing="10" Margin="10">
+                <TextBlock Text="BDO Path:"  TextAlignment="Right" VerticalAlignment="Top"/>
+                <TextBox Text="{Binding BDOPath}"  Watermark="{Binding BDOPath}" Width="200" VerticalAlignment="Top"/>
+                <Button Content="Browse" Click="Browse" VerticalAlignment="Top"/>
             </StackPanel>
         </TabItem>
 

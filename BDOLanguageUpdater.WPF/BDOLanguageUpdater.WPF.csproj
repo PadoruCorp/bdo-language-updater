@@ -12,6 +12,7 @@
     <ItemGroup>
         <Folder Include="Models\" />
         <AvaloniaResource Include="Assets\**" />
+        <Folder Include="Assets\" />
     </ItemGroup>
 
 
@@ -30,5 +31,12 @@
 
     <ItemGroup>
       <ProjectReference Include="..\BDOLanguageUpdater.Service\BDOLanguageUpdater.Service.csproj" />
+    </ItemGroup>
+
+
+    <ItemGroup>
+      <AvaloniaResource Update="Assets\icon.ico">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </AvaloniaResource>
     </ItemGroup>
 </Project>

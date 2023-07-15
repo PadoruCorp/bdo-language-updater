@@ -10,6 +10,7 @@ namespace BDOLanguageUpdater.WPF.Views;
 public partial class MainWindow : Window
 {
     private readonly LanguageFileWatcher watcher;
+    private readonly MainWindowViewModel viewModel;
     private readonly IWritableOptions<UserPreferencesOptions> userPreferencesOptions;
 
     public MainWindow(MainWindowViewModel viewModel, LanguageFileWatcher watcher,
@@ -20,7 +21,10 @@ public partial class MainWindow : Window
         DataContext = viewModel;
 
         this.watcher = watcher;
+        this.viewModel = viewModel;
         this.userPreferencesOptions = userPreferencesOptions;
+
+        viewModel.GeneralTabViewModel.BDOPath = userPreferencesOptions.Value.BDOClientPath;
     }
 
     private async void Browse(object sender, RoutedEventArgs args)
@@ -46,5 +50,6 @@ public partial class MainWindow : Window
 
         watcher.SetPath(path);
         userPreferencesOptions.Update(options => { options.BDOClientPath = path; });
+        viewModel.GeneralTabViewModel.BDOPath = path;
     }
 }
