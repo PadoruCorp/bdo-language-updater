@@ -29,26 +29,32 @@ public class LanguageUpdaterService : BackgroundService
         watcher.OnFileChanged += OnFileChanged;
     }
 
+    public async Task UpdateLanguage()
+    {
+        OnFileUpdateStart?.Invoke();
+
+        logger.LogInformation("Updating file: {time}", DateTimeOffset.Now);
+
+        await using var scope = serviceProvider.CreateAsyncScope();
+
+        var fileUpdater = scope.ServiceProvider.GetRequiredService<LanguageFileUpdater>();
+
+        await fileUpdater.UpdateFile();
+
+        logger.LogInformation("File updated: {time}", DateTimeOffset.Now);
+
+        hasToUpdateFile = false;
+
+        OnFileUpdateFinish?.Invoke();
+    }
+
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         while (!stoppingToken.IsCancellationRequested)
         {
             if (hasToUpdateFile)
             {
-                OnFileUpdateStart?.Invoke();
-
-                logger.LogInformation("Updating file: {time}", DateTimeOffset.Now);
-
-                await using var scope = serviceProvider.CreateAsyncScope();
-                var fileUpdater = scope.ServiceProvider.GetRequiredService<LanguageFileUpdater>();
-
-                await fileUpdater.UpdateFile();
-
-                logger.LogInformation("File updated: {time}", DateTimeOffset.Now);
-
-                hasToUpdateFile = false;
-
-                OnFileUpdateFinish?.Invoke();
+                await UpdateLanguage();
             }
 
             await Task.Delay(userPreferencesOptions.Value.FileCheckInterval, stoppingToken);

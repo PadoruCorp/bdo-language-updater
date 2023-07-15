@@ -12,9 +12,11 @@ public partial class MainWindow : Window
     private readonly LanguageFileWatcher watcher;
     private readonly MainWindowViewModel viewModel;
     private readonly IWritableOptions<UserPreferencesOptions> userPreferencesOptions;
+    private readonly LanguageUpdaterService languageUpdaterService;
 
     public MainWindow(MainWindowViewModel viewModel, LanguageFileWatcher watcher,
-        IWritableOptions<UserPreferencesOptions> userPreferencesOptions)
+        IWritableOptions<UserPreferencesOptions> userPreferencesOptions,
+        LanguageUpdaterService languageUpdaterService)
     {
         InitializeComponent();
 
@@ -23,7 +25,7 @@ public partial class MainWindow : Window
         this.watcher = watcher;
         this.viewModel = viewModel;
         this.userPreferencesOptions = userPreferencesOptions;
-
+        this.languageUpdaterService = languageUpdaterService;
         viewModel.GeneralTabViewModel.BDOPath = userPreferencesOptions.Value.BDOClientPath;
     }
 
@@ -51,5 +53,14 @@ public partial class MainWindow : Window
         watcher.SetPath(path);
         userPreferencesOptions.Update(options => { options.BDOClientPath = path; });
         viewModel.GeneralTabViewModel.BDOPath = path;
+    }
+
+    private async void UpdateLanguage(object sender, RoutedEventArgs args)
+    {
+        UpdateLanguageButton.IsEnabled = false;
+
+        await languageUpdaterService.UpdateLanguage();
+
+        UpdateLanguageButton.IsEnabled = true;
     }
 }
