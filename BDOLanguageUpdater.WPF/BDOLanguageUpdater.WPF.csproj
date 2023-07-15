@@ -7,12 +7,14 @@
         <ApplicationManifest>app.manifest</ApplicationManifest>
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
         <DefineConstants Condition=" '$(TargetFramework)' == 'net7.0-windows10.0.17763.0' ">ON_W10</DefineConstants>
+        <ApplicationIcon>Assets\icon.ico</ApplicationIcon>
     </PropertyGroup>
 
     <ItemGroup>
         <Folder Include="Models\" />
         <AvaloniaResource Include="Assets\**" />
         <AvaloniaResource Remove="Assets\icon.png" />
+        <Content Include="Assets\icon.ico" />
         <Content Include="Assets\icon.png">
           <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </Content>
