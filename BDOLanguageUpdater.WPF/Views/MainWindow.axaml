@@ -18,10 +18,10 @@
     <TabControl>
 		
         <TabItem Header="General" >
-            <StackPanel DataContext="{Binding GeneralTabViewModel}" Orientation="Horizontal" Spacing="10" Margin="10">
-                <TextBlock Text="BDO Path:"  TextAlignment="Right" VerticalAlignment="Top"/>
-                <TextBox Text="{Binding BDOPath}"  Watermark="{Binding BDOPath}" Width="200" VerticalAlignment="Top"/>
-                <Button Content="Browse" Click="Browse" VerticalAlignment="Top"/>
+            <StackPanel DataContext="{Binding GeneralTabViewModel}" Orientation="Horizontal" Spacing="10" Margin="10" VerticalAlignment="Top">
+                <TextBlock Text="BDO Path:" TextAlignment="Right" VerticalAlignment="Center"/>
+                <TextBox Text="{Binding BDOPath}"  Watermark="{Binding BDOPath}" Width="400" VerticalAlignment="Center"/>
+                <Button Content="Browse" Click="Browse" VerticalAlignment="Center"/>
             </StackPanel>
         </TabItem>
 
