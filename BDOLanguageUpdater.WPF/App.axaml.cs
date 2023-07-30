@@ -45,8 +45,6 @@ public class App : Application
             SetupMainWindow(desktop.Args);
 
             RegisterTrayIcon();
-
-            RegisterOnStartup();
         }
 
         base.OnFrameworkInitializationCompleted();
