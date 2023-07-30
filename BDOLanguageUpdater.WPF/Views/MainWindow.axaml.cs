@@ -14,11 +14,15 @@ public partial class MainWindow : Window
     private readonly MainWindowViewModel viewModel;
     private readonly IWritableOptions<UserPreferencesOptions> userPreferencesOptions;
     private readonly LanguageUpdaterService languageUpdaterService;
-    public bool ExitingFromTray = false;
+    private readonly StartupHelper startupHelper;
 
-    public MainWindow(MainWindowViewModel viewModel, LanguageFileWatcher watcher,
+    public bool ExitingFromTray { get; set; } = false;
+
+    public MainWindow(MainWindowViewModel viewModel, 
+        LanguageFileWatcher watcher,
         IWritableOptions<UserPreferencesOptions> userPreferencesOptions,
-        LanguageUpdaterService languageUpdaterService)
+        LanguageUpdaterService languageUpdaterService,
+        StartupHelper startupHelper)
     {
         InitializeComponent();
 
@@ -28,15 +32,25 @@ public partial class MainWindow : Window
         this.viewModel = viewModel;
         this.userPreferencesOptions = userPreferencesOptions;
         this.languageUpdaterService = languageUpdaterService;
+        this.startupHelper = startupHelper;
         viewModel.GeneralTabViewModel.BDOPath = userPreferencesOptions.Value.BDOClientPath;
         viewModel.AdvancedTabViewModel.HideToTrayOnClose = userPreferencesOptions.Value.HideToTrayOnClose;
+        viewModel.AdvancedTabViewModel.OpenOnStartup = userPreferencesOptions.Value.OpenOnStartup;
         
         viewModel.AdvancedTabViewModel.ObservableForProperty(vm => vm.HideToTrayOnClose).Subscribe(HideToTrayOnCloseChanged);
+        viewModel.AdvancedTabViewModel.ObservableForProperty(vm => vm.OpenOnStartup).Subscribe(OpenOnStartupChanged);
     }
 
     private void HideToTrayOnCloseChanged(IObservedChange<AdvancedTabViewModel, bool> obj)
     {
         this.userPreferencesOptions.Update(options => { options.HideToTrayOnClose = obj.Value; });
+    }
+
+    private void OpenOnStartupChanged(IObservedChange<AdvancedTabViewModel, bool> obj)
+    {
+        this.userPreferencesOptions.Update(options => { options.OpenOnStartup = obj.Value; });
+
+        startupHelper.SetStartupOnBoot(obj.Value);
     }
 
     private async void Browse(object sender, RoutedEventArgs args)

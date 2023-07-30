@@ -1,9 +1,12 @@
 ﻿using BDOLanguageUpdater.Service;
+using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Logging;
+#if ON_W10
 using Microsoft.Win32;
 using System;
 using System.IO;
 using System.Reflection;
+#endif
 
 namespace BDOLanguageUpdater.WPF;
 
@@ -20,8 +23,9 @@ public class StartupHelper
 
     public void SetStartupOnBoot(bool enable)
     {
+#if ON_W10
         var appName = Assembly.GetExecutingAssembly().GetName().Name;
-        var appPath = GetAppExecutablePath();
+        var appPath = Path.GetFullPath(Assembly.GetEntryAssembly().Location).Replace(".dll", ".exe");
 
         try
         {
@@ -36,6 +40,8 @@ public class StartupHelper
                     return;
                 }
 
+                var command = $"\"{appPath}\" {App.INITIALIZE_ON_TRAY_ARG}";
+
                 registryKey.SetValue(appName, appPath);
             }
             else
@@ -47,20 +53,6 @@ public class StartupHelper
         {
             logger.LogInformation("Error setting startup: " + ex.Message, DateTimeOffset.Now);
         }
-    }
-
-    public static string GetAppExecutablePath()
-    {
-        try
-        {
-            var assemblyLocation = Assembly.GetEntryAssembly().Location;
-
-            return Path.GetFullPath(assemblyLocation).Replace(".dll", ".exe");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine("Error getting app executable path: " + ex.Message);
-            return string.Empty;
-        }
+#endif
     }
 }

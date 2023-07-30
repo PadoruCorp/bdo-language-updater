@@ -12,6 +12,7 @@ public class LanguageFileWatcher
     private FileSystemWatcher? watcher;
     public Action? OnFileChanged;
     private readonly Stopwatch stopwatch;
+
     public LanguageFileWatcher(ILogger<LanguageUpdaterService> logger, IOptionsSnapshot<UserPreferencesOptions> userPreferencesOptions)
     {
         this.logger = logger;

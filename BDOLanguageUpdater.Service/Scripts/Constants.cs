@@ -15,6 +15,7 @@ class Constants
     public const string DEFAULT_STRING_TO_REPLACE_ON_FILE = "##";
     public const int DEFAULT_VERSION_NUMBER_INDEX = 2;
     public const bool DEFAULT_MINIMIZE_TO_TRAY = true;
+    public const bool DEFAULT_OPEN_ON_STARTUP = true;
 
     // Localization file
     public const string DOWNLOADED_FILE_NAME = "languagedata_en.loc";

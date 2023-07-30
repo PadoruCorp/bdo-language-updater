@@ -7,6 +7,7 @@ using BDOLanguageUpdater.Service;
 using BDOLanguageUpdater.WPF.Views;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using ReactiveUI;
 using System;
 
@@ -14,7 +15,10 @@ namespace BDOLanguageUpdater.WPF;
 
 public class App : Application
 {
+    public const string INITIALIZE_ON_TRAY_ARG = "InitializeOnTray";
+
     private readonly IHost host;
+    private IClassicDesktopStyleApplicationLifetime desktop;
     private Window? myMainWindow;
 
     public App()
@@ -36,8 +40,9 @@ public class App : Application
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            desktop.MainWindow = host.Services.GetService<MainWindow>();
-            myMainWindow = desktop.MainWindow;
+            this.desktop = desktop;
+
+            SetupMainWindow(desktop.Args);
 
             RegisterTrayIcon();
 
@@ -81,16 +86,34 @@ public class App : Application
         SetValue(TrayIcon.IconsProperty, trayIcons);
     }
 
+    private void SetupMainWindow(string[] args)
+    {
+        desktop.ShutdownMode = ShutdownMode.OnLastWindowClose;
+
+        var hasToShowWindow = args.Length <= 0 ||
+                              !args[0].ToLower().Equals(INITIALIZE_ON_TRAY_ARG.ToLower());
+
+        if (hasToShowWindow)
+        {
+            InitMainWindow();
+        }
+    }
+
     private void RegisterOnStartup()
     {
-        var startupHelper = host.Services.GetService<StartupHelper>();
+        var startupHelper = host.Services.GetRequiredService<StartupHelper>();
+        var userPreferences = host.Services.GetRequiredService<IOptionsSnapshot<UserPreferencesOptions>>();
 
-        startupHelper.SetStartupOnBoot(true);
+        startupHelper.SetStartupOnBoot(userPreferences.Value.OpenOnStartup);
     }
 
     private void ShowApplication()
     {
-        if (myMainWindow == null) return;
+        if (myMainWindow == null)
+        {
+            InitMainWindow();
+        }
+
         myMainWindow.WindowState = WindowState.Normal;
         myMainWindow.Show();
     }
@@ -101,5 +124,11 @@ public class App : Application
         
         mainWindow.ExitingFromTray = true;
         myMainWindow?.Close();
+    }
+
+    private void InitMainWindow()
+    {
+        desktop.MainWindow = host.Services.GetService<MainWindow>();
+        myMainWindow = desktop.MainWindow;
     }
 }
