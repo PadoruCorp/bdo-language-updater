@@ -4,5 +4,15 @@ namespace BDOLanguageUpdater.WPF.ViewModels;
 
 public class AdvancedTabViewModel : ReactiveObject
 {
-    public string FileChangedCheckInterval { get; set; } = null!;
+    private bool _hideToTrayOnClose;
+    
+    public bool HideToTrayOnClose
+    {
+        get => _hideToTrayOnClose;
+        set
+        {
+            _hideToTrayOnClose = value;
+            this.RaisePropertyChanged();
+        }
+    }
 }

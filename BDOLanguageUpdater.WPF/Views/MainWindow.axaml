@@ -30,7 +30,7 @@
 
         <TabItem Header="Advanced" >
             <StackPanel DataContext="{Binding AdvancedTabViewModel}" Spacing="10">
-                <TextBox Text="{Binding FileChangedCheckInterval}" />
+                <ToggleSwitch Content="Hide to Tray On Close" IsChecked="{Binding HideToTrayOnClose}" Margin="0,5,0,0"/>
             </StackPanel>
         </TabItem>
 		

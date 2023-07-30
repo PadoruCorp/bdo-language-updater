@@ -4,6 +4,7 @@ using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using BDOLanguageUpdater.Service;
 using BDOLanguageUpdater.WPF.ViewModels;
+using ReactiveUI;
 
 namespace BDOLanguageUpdater.WPF.Views;
 
@@ -13,6 +14,7 @@ public partial class MainWindow : Window
     private readonly MainWindowViewModel viewModel;
     private readonly IWritableOptions<UserPreferencesOptions> userPreferencesOptions;
     private readonly LanguageUpdaterService languageUpdaterService;
+    public bool ExitingFromTray = false;
 
     public MainWindow(MainWindowViewModel viewModel, LanguageFileWatcher watcher,
         IWritableOptions<UserPreferencesOptions> userPreferencesOptions,
@@ -27,6 +29,14 @@ public partial class MainWindow : Window
         this.userPreferencesOptions = userPreferencesOptions;
         this.languageUpdaterService = languageUpdaterService;
         viewModel.GeneralTabViewModel.BDOPath = userPreferencesOptions.Value.BDOClientPath;
+        viewModel.AdvancedTabViewModel.HideToTrayOnClose = userPreferencesOptions.Value.HideToTrayOnClose;
+        
+        viewModel.AdvancedTabViewModel.ObservableForProperty(vm => vm.HideToTrayOnClose).Subscribe(HideToTrayOnCloseChanged);
+    }
+
+    private void HideToTrayOnCloseChanged(IObservedChange<AdvancedTabViewModel, bool> obj)
+    {
+        this.userPreferencesOptions.Update(options => { options.HideToTrayOnClose = obj.Value; });
     }
 
     private async void Browse(object sender, RoutedEventArgs args)
@@ -62,5 +72,23 @@ public partial class MainWindow : Window
         await languageUpdaterService.UpdateLanguage();
 
         UpdateLanguageButton.IsEnabled = true;
+    }
+
+    protected override void OnClosing(WindowClosingEventArgs e)
+    {
+        base.OnClosing(e);
+        
+        if (ExitingFromTray)
+        {
+            return;
+        }
+        
+        if (this.IsVisible && !viewModel.AdvancedTabViewModel.HideToTrayOnClose)
+        {
+            return;
+        }
+
+        e.Cancel = true;
+        this.Hide();
     }
 }
