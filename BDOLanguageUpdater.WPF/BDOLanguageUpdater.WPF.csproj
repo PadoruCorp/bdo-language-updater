@@ -1,5 +1,21 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <Authors>Maximiliano Muller, Santiago Gerhart.</Authors>
+        <Company>Padoru Corp.</Company>
+        <Copyright>Copyright © 2023 Padoru Corp.</Copyright>
+        <Description>
+            This application purpose is to change the language of Black Desert Online to english.
+            When the game path is correctly set, the language updates automatically on every update.
+        </Description>
+        
+        <Product>BDOLanguageUpdater</Product>
+        <ProductName>BDOLanguageUpdater</ProductName>
+        <AssemblyTitle>BDOLanguageUpdater</AssemblyTitle>
+        <ProductVersion>2.0.0</ProductVersion>
+        <AssemblyVersion>2.0.0</AssemblyVersion>
+        <FileVersion>2.0.0</FileVersion>
+        
         <OutputType>WinExe</OutputType>
         <TargetFrameworks>net7.0;net7.0-windows10.0.17763.0</TargetFrameworks>
         <Nullable>enable</Nullable>
