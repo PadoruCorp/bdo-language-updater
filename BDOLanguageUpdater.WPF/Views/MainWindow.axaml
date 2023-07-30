@@ -1,0 +1,40 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:BDOLanguageUpdater.WPF.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="250"
+        x:Class="BDOLanguageUpdater.WPF.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Title="BDO Language Updater"
+        Width="700"
+        Height="400"
+        Icon="/Assets/icon.ico">
+
+    <Design.DataContext>
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+
+    <TabControl>
+		
+        <TabItem Header="General" >
+          <StackPanel DataContext="{Binding GeneralTabViewModel}" Orientation="Vertical" Spacing="10" Margin="10" VerticalAlignment="Top">
+            <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Top">
+                <TextBlock Text="BDO Path:" TextAlignment="Right" VerticalAlignment="Center"/>
+                <TextBox Text="{Binding BDOPath}"  Watermark="{Binding BDOPath}" Width="400" VerticalAlignment="Center"/>
+                <Button Content="Browse" Click="Browse" VerticalAlignment="Center"/>
+            </StackPanel>
+            <Button Name="UpdateLanguageButton" Content="Update Language" Click="UpdateLanguage" VerticalAlignment="Center"/>
+          </StackPanel>
+        </TabItem>
+
+        <TabItem Header="Advanced" >
+            <StackPanel DataContext="{Binding AdvancedTabViewModel}" Spacing="10">
+                <ToggleSwitch Content="Hide to Tray On Close" IsChecked="{Binding HideToTrayOnClose}" Margin="0,5,0,0"/>
+                <ToggleSwitch Content="Open On Startup" IsChecked="{Binding OpenOnStartup}" Margin="0,5,0,0"/>
+            </StackPanel>
+        </TabItem>
+		
+    </TabControl>
+
+</Window>
