@@ -11,8 +11,8 @@ public class LanguageUpdaterService : BackgroundService
 {
     private readonly ILogger<LanguageUpdaterService> logger;
     private readonly IWritableOptions<UserPreferencesOptions> userPreferencesOptions;
+    private readonly LanguageFileWatcher watcher;
     private readonly IServiceProvider serviceProvider;
-    private bool hasToUpdateFile;
 
     public event Action? OnFileUpdateStart;
     public event Action? OnFileUpdateFinish;
@@ -24,6 +24,7 @@ public class LanguageUpdaterService : BackgroundService
     {
         this.logger = logger;
         this.userPreferencesOptions = userPreferencesOptions;
+        this.watcher = watcher;
         this.serviceProvider = serviceProvider;
 
         watcher.OnFileChanged += OnFileChanged;
@@ -32,7 +33,8 @@ public class LanguageUpdaterService : BackgroundService
     public async Task UpdateLanguage()
     {
         OnFileUpdateStart?.Invoke();
-
+        watcher.OnFileChanged -= OnFileChanged;
+        
         logger.LogInformation("Updating file: {time}", DateTimeOffset.Now);
 
         await using var scope = serviceProvider.CreateAsyncScope();
@@ -43,26 +45,18 @@ public class LanguageUpdaterService : BackgroundService
 
         logger.LogInformation("File updated: {time}", DateTimeOffset.Now);
 
-        hasToUpdateFile = false;
-
         OnFileUpdateFinish?.Invoke();
+        
+        watcher.OnFileChanged += OnFileChanged;
     }
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        while (!stoppingToken.IsCancellationRequested)
-        {
-            if (hasToUpdateFile)
-            {
-                await UpdateLanguage();
-            }
-
-            await Task.Delay(userPreferencesOptions.Value.FileCheckInterval, stoppingToken);
-        }
+        return Task.CompletedTask;
     }
 
-    private void OnFileChanged()
+    private async void OnFileChanged()
     {
-        hasToUpdateFile = true;
+        await UpdateLanguage();
     }
 }

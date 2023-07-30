@@ -14,7 +14,6 @@ class Constants
     public const string DEFAULT_STRING_TO_REPLACE_ON_URL = "###";
     public const string DEFAULT_STRING_TO_REPLACE_ON_FILE = "##";
     public const int DEFAULT_VERSION_NUMBER_INDEX = 2;
-    public const int DEFAULT_FILE_CHECK_INTERVAL = 3000; // In milliseconds
 
     // Localization file
     public const string DOWNLOADED_FILE_NAME = "languagedata_en.loc";
