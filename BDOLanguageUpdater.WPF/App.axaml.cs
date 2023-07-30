@@ -99,14 +99,6 @@ public class App : Application
         }
     }
 
-    private void RegisterOnStartup()
-    {
-        var startupHelper = host.Services.GetRequiredService<StartupHelper>();
-        var userPreferences = host.Services.GetRequiredService<IOptionsSnapshot<UserPreferencesOptions>>();
-
-        startupHelper.SetStartupOnBoot(userPreferences.Value.OpenOnStartup);
-    }
-
     private void ShowApplication()
     {
         if (myMainWindow == null)
