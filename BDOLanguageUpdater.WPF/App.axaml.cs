@@ -1,4 +1,3 @@
-using System;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -9,6 +8,7 @@ using BDOLanguageUpdater.WPF.Views;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using ReactiveUI;
+using System;
 
 namespace BDOLanguageUpdater.WPF;
 
@@ -40,6 +40,8 @@ public class App : Application
             myMainWindow = desktop.MainWindow;
 
             RegisterTrayIcon();
+
+            RegisterOnStartup();
         }
 
         base.OnFrameworkInitializationCompleted();
@@ -77,6 +79,13 @@ public class App : Application
         };
 
         SetValue(TrayIcon.IconsProperty, trayIcons);
+    }
+
+    private void RegisterOnStartup()
+    {
+        var startupHelper = host.Services.GetService<StartupHelper>();
+
+        startupHelper.SetStartupOnBoot(true);
     }
 
     private void ShowApplication()
