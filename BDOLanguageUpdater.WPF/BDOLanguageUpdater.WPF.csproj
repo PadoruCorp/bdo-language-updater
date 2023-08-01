@@ -52,6 +52,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\BDOLanguageUpdater.Service\BDOLanguageUpdater.Service.csproj" />
+      <ProjectReference Include="..\BDOLanguageUpdater.ShortcutGenerator\BDOLanguageUpdater.ShortcutGenerator.csproj" />
     </ItemGroup>
 
 
