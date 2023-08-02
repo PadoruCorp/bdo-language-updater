@@ -7,15 +7,13 @@ using BDOLanguageUpdater.Service;
 using BDOLanguageUpdater.WPF.Views;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Options;
 using ReactiveUI;
-using System;
 
 namespace BDOLanguageUpdater.WPF;
 
 public class App : Application
 {
-    public const string INITIALIZE_ON_TRAY_ARG = "InitializeOnTray";
+    public const string INITIALIZE_ON_TRAY_ARG = "--background";
 
     private readonly IHost host;
     private IClassicDesktopStyleApplicationLifetime desktop;

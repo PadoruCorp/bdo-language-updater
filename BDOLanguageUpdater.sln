@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BDOLanguageUpdater.Service"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BDOLanguageUpdater.WPF", "BDOLanguageUpdater.WPF\BDOLanguageUpdater.WPF.csproj", "{E23FA899-E430-433F-B7F4-14E54C458B57}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BDOLanguageUpdater.ShortcutGenerator", "BDOLanguageUpdater.ShortcutGenerator\BDOLanguageUpdater.ShortcutGenerator.csproj", "{2C412198-C6C0-4E65-AE78-E0C5FBA4E9D0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +26,9 @@ Global
 		{E23FA899-E430-433F-B7F4-14E54C458B57}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E23FA899-E430-433F-B7F4-14E54C458B57}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E23FA899-E430-433F-B7F4-14E54C458B57}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2C412198-C6C0-4E65-AE78-E0C5FBA4E9D0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2C412198-C6C0-4E65-AE78-E0C5FBA4E9D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2C412198-C6C0-4E65-AE78-E0C5FBA4E9D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2C412198-C6C0-4E65-AE78-E0C5FBA4E9D0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
