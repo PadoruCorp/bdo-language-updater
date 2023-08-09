@@ -41,7 +41,10 @@ public class LanguageFileWatcher
         watcher.NotifyFilter = NotifyFilters.Attributes
                              | NotifyFilters.CreationTime
                              | NotifyFilters.LastWrite
-                             | NotifyFilters.Size;
+                             | NotifyFilters.Size
+                             | NotifyFilters.FileName
+                             | NotifyFilters.LastAccess
+                             | NotifyFilters.Security;
 
         watcher.Changed += OnFileChangedCallback;
 
