@@ -12,19 +12,47 @@ public static class LocSerializer
 {
     private const string Utf16LeBom = "\ufeff";
 
-    private static Task<string> TrimStart(string str, string chars)
+    public static async Task<string> Decompress(byte[] bytes)
+    {
+        try
+        {
+            var dataDecompress = await InflateAsync(bytes);
+            var dataDecrypt = Decrypt(dataDecompress);
+            return dataDecrypt;
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+    }
+
+    public static async Task<byte[]> Compress(string content)
+    {
+        try
+        {
+            var dataEncrypt = Encrypt(content);
+            var dataCompress = await Deflate(dataEncrypt);
+            return dataCompress;
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+    }
+
+    private static string TrimStart(string str, string chars)
     {
         if (str.StartsWith(chars))
         {
             str = str.Substring(chars.Length);
         }
 
-        return Task.FromResult(str);
+        return str;
     }
 
     private static string AddSingleQuote(string str)
     {
-        if (new[] { '+', '=', '-' }.All(ch => !str.StartsWith(ch)))
+        if (!new[] { '+', '=', '-' }.All(ch => !str.StartsWith(ch)))
         {
             str = $"'{str}";
         }
@@ -32,17 +60,8 @@ public static class LocSerializer
         return str;
     }
 
-    private static async Task<byte[]> FileToBuffer(string filePath)
+    private static async Task<byte[]> InflateAsync(byte[] buffer)
     {
-        await using var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
-        var buffer = new byte[stream.Length];
-        await stream.ReadAsync(buffer, 0, (int)stream.Length);
-        return buffer;
-    }
-
-    private static async Task<byte[]> ZlibDecompress(string filePath)
-    {
-        var buffer = await FileToBuffer(filePath);
         using var memoryStream = new MemoryStream(buffer, 6, buffer.Length - 6);
         await using var deflateStream = new DeflateStream(memoryStream, CompressionMode.Decompress);
         using var resultStream = new MemoryStream();
@@ -50,20 +69,21 @@ public static class LocSerializer
         return resultStream.ToArray();
     }
 
-    private static byte[] ZlibCompress(byte[] buffer)
+    private static async Task<byte[]> Deflate(byte[] buffer)
     {
         using var memoryStream = new MemoryStream();
         using var deflateStream = new DeflateStream(memoryStream, CompressionMode.Compress, true);
-        deflateStream.Write(buffer, 0, buffer.Length);
+        await deflateStream.WriteAsync(buffer, 0, buffer.Length);
         return memoryStream.ToArray();
     }
-
-    private static byte[] Encrypt(string filePath)
+    
+    private static byte[] Encrypt(string fileContent)
     {
         var lines = new List<string>();
-        var utf16LeBomBytes = Encoding.Unicode.GetBytes(Utf16LeBom);
 
-        foreach (var line in File.ReadLines(filePath, Encoding.Unicode))
+        fileContent = TrimStart(fileContent, Utf16LeBom);
+
+        foreach (var line in fileContent.Split('\n'))
         {
             if (string.IsNullOrWhiteSpace(line))
             {
@@ -82,7 +102,7 @@ public static class LocSerializer
                 }
                 else
                 {
-                    content.Add(int.Parse(parts[i]));
+                    content.Add(Convert.ToInt16((parts[i])));
                 }
             }
 
@@ -91,17 +111,17 @@ public static class LocSerializer
             var buffer = new byte[size];
             var index = 0;
 
-            BitConverter.GetBytes(strSize).CopyTo(buffer, index);
+            BitConverter.GetBytes(Convert.ToInt32(strSize)).CopyTo(buffer, index);
             index += 4;
-            BitConverter.GetBytes((int)content[0]).CopyTo(buffer, index);
+            BitConverter.GetBytes(Convert.ToInt32(content[0])).CopyTo(buffer, index);
             index += 4;
-            BitConverter.GetBytes((int)content[1]).CopyTo(buffer, index);
+            BitConverter.GetBytes(Convert.ToInt32(content[1])).CopyTo(buffer, index);
             index += 4;
-            BitConverter.GetBytes((short)content[2]).CopyTo(buffer, index);
+            BitConverter.GetBytes((ushort)content[2]).CopyTo(buffer, index);
             index += 2;
-            buffer[index] = (byte)(int)content[3];
+            buffer[index] = (byte)content[3];
             index += 1;
-            buffer[index] = (byte)(int)content[4];
+            buffer[index] = (byte)content[4];
             index += 1;
             Encoding.Unicode.GetBytes((string)content[5]).CopyTo(buffer, index);
             index += strSize * 2;
@@ -144,33 +164,5 @@ public static class LocSerializer
         }
 
         return Utf16LeBom + string.Join("\n", result);
-    }
-
-    public static async Task<string> Decompress(string source = "./languagedata_en.loc")
-    {
-        try
-        {
-            var dataDecompress = await ZlibDecompress(source);
-            var dataDecrypt = Decrypt(dataDecompress);
-            return dataDecrypt;
-        }
-        catch (Exception ex)
-        {
-            throw ex;
-        }
-    }
-
-    public static async Task<byte[]> Compress(string source = "./languagedata_en.tsv")
-    {
-        try
-        {
-            var dataEncrypt = Encrypt(source);
-            var dataCompress = ZlibCompress(dataEncrypt);
-            return dataCompress;
-        }
-        catch (Exception ex)
-        {
-            throw ex;
-        }
     }
 }
