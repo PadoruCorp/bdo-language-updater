@@ -7,8 +7,8 @@ class Constants
     public const string LOGS_FILE_NAME = "logs.txt";
     
     // Defaults
-    public const string DEFAULT_VERSION_URL = "http://dn.sea.playblackdesert.com/UploadData/ads_files";
-    public const string DEFAULT_FILE_URL = "http://dn.sea.playblackdesert.com/UploadData/ads/languagedata_en/###/languagedata_en.loc";
+    public const string DEFAULT_VERSION_URL = "http://naeu-o-dn.playblackdesert.com/UploadData/ads_files";
+    public const string DEFAULT_FILE_URL = "https://naeu-o-dn.playblackdesert.com/UploadData/ads/languagedata_en/###/languagedata_en.loc";
     public const string DEFAULT_REGEX = @"\D+";
     public const string DEFAULT_BLACK_DESERT_CLIENT_PATH = "E:\\Steam\\steamapps\\common\\Black Desert Online";
     public const string DEFAULT_STRING_TO_REPLACE_ON_URL = "###";
