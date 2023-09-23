@@ -14,30 +14,16 @@ public static class LocSerializer
 
     public static async Task<string> Decompress(byte[] bytes)
     {
-        try
-        {
-            var dataDecompress = await InflateAsync(bytes);
-            var dataDecrypt = Decrypt(dataDecompress);
-            return dataDecrypt;
-        }
-        catch (Exception ex)
-        {
-            throw ex;
-        }
+        var dataDecompress = await InflateAsync(bytes);
+        var dataDecrypt = Decrypt(dataDecompress);
+        return dataDecrypt;
     }
 
     public static async Task<byte[]> Compress(string content)
     {
-        try
-        {
-            var dataEncrypt = Encrypt(content);
-            var dataCompress = await Deflate(dataEncrypt);
-            return dataCompress;
-        }
-        catch (Exception ex)
-        {
-            throw ex;
-        }
+        var dataEncrypt = await Encrypt(content);
+        var dataCompress = await Deflate(dataEncrypt);
+        return dataCompress;
     }
 
     private static string TrimStart(string str, string chars)
@@ -72,66 +58,44 @@ public static class LocSerializer
     private static async Task<byte[]> Deflate(byte[] buffer)
     {
         using var memoryStream = new MemoryStream();
-        using var deflateStream = new DeflateStream(memoryStream, CompressionMode.Compress, true);
-        await deflateStream.WriteAsync(buffer, 0, buffer.Length);
+        await using var deflateStream = new DeflateStream(memoryStream, CompressionMode.Compress, true);
+        await deflateStream.WriteAsync(buffer);
         return memoryStream.ToArray();
     }
     
-    private static byte[] Encrypt(string fileContent)
+    private static async Task<byte[]> Encrypt(string fileContent)
     {
-        var lines = new List<string>();
+        var chunks = new List<byte[]>();
+        var allLines = fileContent.Split("\n");
 
-        fileContent = TrimStart(fileContent, Utf16LeBom);
-
-        foreach (var line in fileContent.Split('\n'))
+        foreach (var line in allLines)
         {
-            if (string.IsNullOrWhiteSpace(line))
-            {
+            var trimmedLine = line.Trim();
+
+            if (string.IsNullOrEmpty(trimmedLine))
                 continue;
-            }
 
-            var parts = line.Split('\t');
-            var content = new List<object>();
-
-            for (var i = 0; i < parts.Length; i++)
+            var content = trimmedLine.Split('\t').Select((e, i) =>
             {
-                if (i > 4)
-                {
-                    content.Add(
-                        TrimStart(parts[i].Replace("<lf>", "\n").Replace("\"", "").Replace("<quot>", "\""), "'"));
-                }
-                else
-                {
-                    content.Add(Convert.ToInt16((parts[i])));
-                }
-            }
+                return i > 4 ? TrimStart(e.Replace("<lf>", "\n").Replace("\"", "").Replace("<quot>", "\""), "'") : e;
+            }).ToArray();
+            
+            int strSize = content[5].Length;
+            using var ms = new MemoryStream();
+            await using var writer = new BinaryWriter(ms);
 
-            var strSize = Encoding.Unicode.GetByteCount((string)content[5]);
-            var size = 4 + 4 + 4 + 2 + 1 + 1 + (strSize * 2) + 4;
-            var buffer = new byte[size];
-            var index = 0;
+            writer.Write(strSize);
+            writer.Write(Convert.ToInt32(content[0]));
+            writer.Write(Convert.ToInt32(content[1]));
+            writer.Write(Convert.ToInt16(content[2]));
+            writer.Write(Convert.ToByte(content[3]));
+            writer.Write(Convert.ToByte(content[4]));
+            writer.Write(Encoding.Unicode.GetBytes(content[5]));
 
-            BitConverter.GetBytes(Convert.ToInt32(strSize)).CopyTo(buffer, index);
-            index += 4;
-            BitConverter.GetBytes(Convert.ToInt32(content[0])).CopyTo(buffer, index);
-            index += 4;
-            BitConverter.GetBytes(Convert.ToInt32(content[1])).CopyTo(buffer, index);
-            index += 4;
-            BitConverter.GetBytes((ushort)content[2]).CopyTo(buffer, index);
-            index += 2;
-            buffer[index] = (byte)content[3];
-            index += 1;
-            buffer[index] = (byte)content[4];
-            index += 1;
-            Encoding.Unicode.GetBytes((string)content[5]).CopyTo(buffer, index);
-            index += strSize * 2;
-            BitConverter.GetBytes(strSize).CopyTo(buffer, index);
-
-            lines.Add(Encoding.Unicode.GetString(buffer));
+            chunks.Add(ms.ToArray());
         }
 
-        var result = string.Join("\n", lines);
-        return Encoding.Unicode.GetBytes(Utf16LeBom + result);
+        return chunks.SelectMany(chunk => chunk).ToArray();
     }
 
     private static string Decrypt(byte[] buffer)
@@ -156,13 +120,12 @@ public static class LocSerializer
             var strBytes = new byte[strSize * 2];
             Array.Copy(buffer, index, strBytes, 0, strSize * 2);
             index += (int)strSize * 2;
-            var str = AddSingleQuote(Encoding.Unicode.GetString(strBytes).Replace("\n", "<lf>")
-                .Replace("\"", "<quot>"));
+            var str = AddSingleQuote(Encoding.Unicode.GetString(strBytes).Replace("\n", "<lf>").Replace("\"", "<quot>"));
             index += 4;
 
             result.Add($"{strType}\t{strID1}\t{strID2}\t{strID3}\t{strID4}\t{str}");
         }
 
-        return Utf16LeBom + string.Join("\n", result);
+        return string.Join("\n", result);
     }
 }
