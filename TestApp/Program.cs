@@ -11,5 +11,5 @@ var englishTSV = await LocSerializer.Decompress(englishFileContent);
 var spanishTSV = await LocSerializer.Decompress(spanishFileContent);
 var finalTsv = DictionaryUtils.Merge(englishTSV, spanishTSV);
 
-var finalFile = await LocSerializer.Compress(finalTsv);
-File.WriteAllBytes(FINAL_FILE_PATH, finalFile);
+var finalFile = await LocSerializer.Compress(finalTsv);   
+await File.WriteAllBytesAsync(FINAL_FILE_PATH, finalFile);

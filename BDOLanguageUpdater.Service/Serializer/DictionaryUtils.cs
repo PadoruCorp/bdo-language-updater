@@ -50,3 +50,13 @@ public static class DictionaryUtils
         return builder.ToString().Trim();
     }
 }
+
+public struct LanguageFileLine
+{
+    public uint FirstId { get; set; }
+    public uint SecondId { get; set; }
+    public ushort ThirdId { get; set; }
+    public byte FourthId { get; set; }
+    public byte FifthId { get; set; }
+    public string Text { get; set; }
+}

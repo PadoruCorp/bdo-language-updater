@@ -21,7 +21,7 @@ public static class LocSerializer
 
     public static async Task<byte[]> Compress(string content)
     {
-        var dataEncrypt = await Encrypt(content);
+        var dataEncrypt = Encrypt(content);
         var dataCompress = await Deflate(dataEncrypt);
         return dataCompress;
     }
@@ -38,7 +38,7 @@ public static class LocSerializer
 
     private static string AddSingleQuote(string str)
     {
-        if (!new[] { '+', '=', '-' }.All(ch => !str.StartsWith(ch)))
+        if (new[] { '+', '=', '-' }.Any(ch => str.StartsWith(ch)))
         {
             str = $"'{str}";
         }
@@ -46,7 +46,7 @@ public static class LocSerializer
         return str;
     }
 
-    private static async Task<byte[]> InflateAsync(byte[] buffer)
+    public static async Task<byte[]> InflateAsync(byte[] buffer)
     {
         using var memoryStream = new MemoryStream(buffer, 6, buffer.Length - 6);
         await using var deflateStream = new DeflateStream(memoryStream, CompressionMode.Decompress);
@@ -55,47 +55,69 @@ public static class LocSerializer
         return resultStream.ToArray();
     }
 
-    private static async Task<byte[]> Deflate(byte[] buffer)
+    public static async Task<byte[]> Deflate(byte[] buffer)
     {
-        using var memoryStream = new MemoryStream();
-        await using var deflateStream = new DeflateStream(memoryStream, CompressionMode.Compress, true);
-        await deflateStream.WriteAsync(buffer);
-        return memoryStream.ToArray();
+        var sizeBuffer = new byte[6];
+        var i = 0;
+        WriteUInt32LE(sizeBuffer,ref i, (uint)buffer.Length);
+
+        sizeBuffer[4] = 0x78;
+        sizeBuffer[5] = 0x01;
+
+        using var compressedStream = new MemoryStream();
+        using var originalStream = new MemoryStream(buffer);
+        await using (var deflateStream = new DeflateStream(compressedStream, CompressionLevel.Fastest))
+        {
+            await originalStream.CopyToAsync(deflateStream);
+        }
+
+        var compressedArray = compressedStream.ToArray();
+        var concatenatedBytes = new byte[sizeBuffer.Length + compressedArray.Length];
+        Array.Copy(sizeBuffer, concatenatedBytes, sizeBuffer.Length);
+        Array.Copy(compressedArray, 0, concatenatedBytes, sizeBuffer.Length, compressedArray.Length);
+
+        return concatenatedBytes;
     }
-    
-    private static async Task<byte[]> Encrypt(string fileContent)
+
+    private static byte[] Encrypt(string fileContent)
     {
         var chunks = new List<byte[]>();
-        var allLines = fileContent.Split("\n");
+
+        var allLines = fileContent.Replace("\r","").Split("\n");
 
         foreach (var line in allLines)
         {
-            var trimmedLine = line.Trim();
-
-            if (string.IsNullOrEmpty(trimmedLine))
+            if (string.IsNullOrEmpty(line))
                 continue;
 
-            var content = trimmedLine.Split('\t').Select((e, i) =>
+            var content = line.Split('\t').Select((e, i) =>
             {
-                return i > 4 ? TrimStart(e.Replace("<lf>", "\n").Replace("\"", "").Replace("<quot>", "\""), "'") : e;
+                return i > 4
+                    ? TrimStart(e.Replace("<lf>", "\n").Replace("\"", "").Replace("<quot>", "\""), "'")
+                    : e;
             }).ToArray();
             
             int strSize = content[5].Length;
-            using var ms = new MemoryStream();
-            await using var writer = new BinaryWriter(ms);
+            int size = 4+4+4+2+1+1+(strSize*2)+4;
+            byte[] buffer = new byte[size];
+            int i = 0;
 
-            writer.Write(strSize);
-            writer.Write(Convert.ToInt32(content[0]));
-            writer.Write(Convert.ToInt32(content[1]));
-            writer.Write(Convert.ToInt16(content[2]));
-            writer.Write(Convert.ToByte(content[3]));
-            writer.Write(Convert.ToByte(content[4]));
-            writer.Write(Encoding.Unicode.GetBytes(content[5]));
+            // Write values to the buffer using little-endian encoding
+            WriteUInt32LE(buffer, ref i, (uint)strSize);
+            WriteUInt32LE(buffer, ref i, Convert.ToUInt32(content[0]));
+            WriteUInt32LE(buffer, ref i, Convert.ToUInt32(content[1]));
+            WriteUInt16LE(buffer, ref i, Convert.ToUInt16(content[2]));
+            WriteUInt8(buffer, ref i, Convert.ToByte(content[3]));
+            WriteUInt8(buffer, ref i, Convert.ToByte(content[4]));
 
-            chunks.Add(ms.ToArray());
+            // Write string content to the buffer as UTF-16LE
+            byte[] utf16Bytes = Encoding.Unicode.GetBytes(content[5]);
+            Array.Copy(utf16Bytes, 0, buffer, i, utf16Bytes.Length);
+
+            chunks.Add(buffer);
         }
 
-        return chunks.SelectMany(chunk => chunk).ToArray();
+        return chunks.SelectMany(bytes => bytes).ToArray();
     }
 
     private static string Decrypt(byte[] buffer)
@@ -127,5 +149,24 @@ public static class LocSerializer
         }
 
         return string.Join("\n", result);
+    }
+    
+    static void WriteUInt32LE(byte[] buffer, ref int offset, uint value)
+    {
+        buffer[offset++] = (byte)(value & 0xFF);
+        buffer[offset++] = (byte)((value >> 8) & 0xFF);
+        buffer[offset++] = (byte)((value >> 16) & 0xFF);
+        buffer[offset++] = (byte)((value >> 24) & 0xFF);
+    }
+
+    static void WriteUInt16LE(byte[] buffer, ref int offset, ushort value)
+    {
+        buffer[offset++] = (byte)(value & 0xFF);
+        buffer[offset++] = (byte)((value >> 8) & 0xFF);
+    }
+
+    static void WriteUInt8(byte[] buffer, ref int offset, byte value)
+    {
+        buffer[offset++] = value;
     }
 }
