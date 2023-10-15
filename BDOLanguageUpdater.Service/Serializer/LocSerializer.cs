@@ -5,28 +5,32 @@ using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Padoru.Core.Files;
 
 namespace BDOLanguageUpdater.Service.Serializer;
 
-public static class LocSerializer
+public class LocSerializer : ISerializer  
 {
     private const string Utf16LeBom = "\ufeff";
+    
+    
+    public async Task<byte[]> Serialize(object value)
+    {
+        var content = value.ToString() ?? throw new InvalidCastException();
+        var dataEncrypt = Encrypt(content);
+        var dataCompress = await Deflate(dataEncrypt);
+        return dataCompress;    
+    }
 
-    public static async Task<string> Decompress(byte[] bytes)
+    public async Task<object> Deserialize(Type type, byte[] bytes, string uri)
     {
         var dataDecompress = await InflateAsync(bytes);
         var dataDecrypt = Decrypt(dataDecompress);
         return dataDecrypt;
+        
     }
 
-    public static async Task<byte[]> Compress(string content)
-    {
-        var dataEncrypt = Encrypt(content);
-        var dataCompress = await Deflate(dataEncrypt);
-        return dataCompress;
-    }
-
-    private static string TrimStart(string str, string chars)
+    private string TrimStart(string str, string chars)
     {
         if (str.StartsWith(chars))
         {
@@ -36,7 +40,7 @@ public static class LocSerializer
         return str;
     }
 
-    private static string AddSingleQuote(string str)
+    private string AddSingleQuote(string str)
     {
         if (new[] { '+', '=', '-' }.Any(ch => str.StartsWith(ch)))
         {
@@ -46,7 +50,7 @@ public static class LocSerializer
         return str;
     }
 
-    public static async Task<byte[]> InflateAsync(byte[] buffer)
+    public async Task<byte[]> InflateAsync(byte[] buffer)
     {
         using var memoryStream = new MemoryStream(buffer, 6, buffer.Length - 6);
         await using var deflateStream = new DeflateStream(memoryStream, CompressionMode.Decompress);
@@ -55,7 +59,7 @@ public static class LocSerializer
         return resultStream.ToArray();
     }
 
-    public static async Task<byte[]> Deflate(byte[] buffer)
+    public async Task<byte[]> Deflate(byte[] buffer)
     {
         var sizeBuffer = new byte[6];
         var i = 0;
@@ -79,7 +83,7 @@ public static class LocSerializer
         return concatenatedBytes;
     }
 
-    private static byte[] Encrypt(string fileContent)
+    private byte[] Encrypt(string fileContent)
     {
         var chunks = new List<byte[]>();
 
@@ -120,7 +124,7 @@ public static class LocSerializer
         return chunks.SelectMany(bytes => bytes).ToArray();
     }
 
-    private static string Decrypt(byte[] buffer)
+    private string Decrypt(byte[] buffer)
     {
         var result = new List<string>();
         var index = 0;

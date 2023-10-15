@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Padoru.Core.Files;
 using Serilog;
 using Serilog.Events;
 
@@ -21,6 +22,9 @@ public static class HostBuilderExtensions
         // Options
         services.ConfigureWritable<UserPreferencesOptions>(context.Configuration.GetSection(UserPreferencesOptions.UserPreferences));
         services.ConfigureWritable<UrlMetadataOptions>(context.Configuration.GetSection(UrlMetadataOptions.UrlMetadata));
+        
+        // File Manager
+        services.RegisterFileManager();
     }
 
     public static IHostBuilder UseSerilog(this IHostBuilder hostBuilder)
