@@ -3,6 +3,7 @@ using System.IO;
 using Microsoft.Extensions.Options;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using BDOLanguageUpdater.Service.Serializer;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Extensions.Logging;
 using Padoru.Core.Files;
@@ -51,9 +52,9 @@ public class LanguageFileUpdater
         
         await DownloadFile(finalFileUri, downloadedFilePath);
         
-        var oldFile = Constants.LOCAL_NOT_SERIALIZED_PROTOCOL_HEADER + Path.Combine(blackDesertFilesPath,
+        var oldFile = Constants.LOCAL_LOCALIZATION_PROTOCOL_HEADER + Path.Combine(blackDesertFilesPath,
             Constants.BLACK_DESERT_LANGUAGE_FILE_NAME.Replace(Constants.DEFAULT_STRING_TO_REPLACE_ON_FILE, "es"));
-        var newFile = Constants.LOCAL_NOT_SERIALIZED_PROTOCOL_HEADER + Path.Combine(Path.GetTempPath(),
+        var newFile = Constants.LOCAL_LOCALIZATION_PROTOCOL_HEADER + Path.Combine(Path.GetTempPath(),
             Constants.BLACK_DESERT_LANGUAGE_FILE_NAME.Replace(Constants.DEFAULT_STRING_TO_REPLACE_ON_FILE, "en"));
 
         await MoveFile(oldFile, newFile);
@@ -91,9 +92,10 @@ public class LanguageFileUpdater
 
     public async Task MoveFile(string oldFileUri, string newFileUri)
     {
-        await fileManager.Delete(oldFileUri);
-        var file = await fileManager.Read<byte[]>(newFileUri);
-        await fileManager.Write(oldFileUri, file.Data);
+        var oldFile = await fileManager.Read<string>(oldFileUri);
+        var newFile = await fileManager.Read<string>(newFileUri);
+        var finalFile = DictionaryUtils.Merge(newFile.Data, oldFile.Data);
+        await fileManager.Write(oldFileUri, finalFile);
         await fileManager.Delete(newFileUri);
     }
 
