@@ -35,7 +35,7 @@ public class Tests : BaseHostTests
         var languageFileUpdater = this.ServiceProvider!.GetRequiredService<LanguageFileUpdater>();
 
         // Act
-        var exception = Record.ExceptionAsync(languageFileUpdater.UpdateFile);
+        var exception = await Record.ExceptionAsync(languageFileUpdater.UpdateFile);
 
         // Assert
         Assert.Null(exception);
