@@ -12,9 +12,9 @@
         <Product>BDOLanguageUpdater</Product>
         <ProductName>BDOLanguageUpdater</ProductName>
         <AssemblyTitle>BDOLanguageUpdater</AssemblyTitle>
-        <ProductVersion>2.0.0</ProductVersion>
-        <AssemblyVersion>2.0.0</AssemblyVersion>
-        <FileVersion>2.0.0</FileVersion>
+        <ProductVersion>2.1.0</ProductVersion>
+        <AssemblyVersion>2.1.0</AssemblyVersion>
+        <FileVersion>2.1.0</FileVersion>
         
         <OutputType>WinExe</OutputType>
         <TargetFrameworks>net7.0;net7.0-windows10.0.17763.0</TargetFrameworks>
