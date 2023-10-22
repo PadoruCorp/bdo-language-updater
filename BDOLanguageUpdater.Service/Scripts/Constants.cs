@@ -18,7 +18,6 @@ public class Constants
     public const bool DEFAULT_OPEN_ON_STARTUP = false;
 
     // Localization file
-    public const string DOWNLOADED_FILE_NAME = "languagedata_en.loc";
     public const string BLACK_DESERT_LANGUAGE_FILES_PATH = "ads";
     public const string BLACK_DESERT_LANGUAGE_FILE_NAME = "languagedata_##.loc";
     public const string BLACK_DESERT_LANGUAGE_FILE_EXTENSION = ".loc";
