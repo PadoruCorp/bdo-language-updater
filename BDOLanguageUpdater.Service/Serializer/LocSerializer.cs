@@ -13,7 +13,6 @@ public class LocSerializer : ISerializer
 {
     private const string Utf16LeBom = "\ufeff";
     
-    
     public async Task<byte[]> Serialize(object value)
     {
         var content = value.ToString() ?? throw new InvalidCastException();
