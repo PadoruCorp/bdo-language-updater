@@ -1,8 +1,6 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-using BDOLanguageUpdater.Service;
+﻿using BDOLanguageUpdater.Service;
 using Microsoft.Extensions.Hosting;
-#if ON_W10
+#if ON_WINDOWS
 using Microsoft.Toolkit.Uwp.Notifications;
 #endif
 
@@ -27,7 +25,7 @@ public class NotificationsManager : BackgroundService
 
     private void LanguageFileUpdaterOnOnUpdateFinish()
     {
-#if ON_W10
+#if ON_WINDOWS
         new ToastContentBuilder()
             .AddText("BDO Language Updater")
             .AddText("Client language updated!")

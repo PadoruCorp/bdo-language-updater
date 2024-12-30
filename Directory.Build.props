@@ -1,0 +1,28 @@
+<Project>
+    <PropertyGroup>
+        <TargetFrameworks>net9.0</TargetFrameworks>
+        <LangVersion>latest</LangVersion>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <RollForward>Major</RollForward>
+
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <Authors>Maximiliano Muller, Santiago Gerhart.</Authors>
+        <Company>Padoru Corp.</Company>
+        <Copyright>Copyright © 2025 Padoru Corp.</Copyright>
+        <Description>
+            This application purpose is to change the language of Black Desert Online to english.
+            When the game path is correctly set, the language updates automatically on every update.
+        </Description>
+
+        <Product>BDOLanguageUpdater</Product>
+        <ProductName>BDOLanguageUpdater</ProductName>
+        <AssemblyTitle>BDOLanguageUpdater</AssemblyTitle>
+        <ProductVersion>3.0.0</ProductVersion>
+        <AssemblyVersion>3.0.0</AssemblyVersion>
+        <FileVersion>3.0.0</FileVersion>
+
+        <!-- https://github.com/NuGet/Home/wiki/Centrally-managing-NuGet-package-versions -->
+        <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    </PropertyGroup>
+</Project>

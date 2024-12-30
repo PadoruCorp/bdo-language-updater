@@ -1,0 +1,27 @@
+<Project>
+    <PropertyGroup>
+        <ExtensionsVersion>9.0.0</ExtensionsVersion>
+        <AvaloniaVersion>11.2.3</AvaloniaVersion>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageVersion Include="Microsoft.Extensions.Hosting" Version="$(ExtensionsVersion)" />
+        <PackageVersion Include="Microsoft.Extensions.Http" Version="$(ExtensionsVersion)" />
+        <PackageVersion Include="Microsoft.Toolkit.Uwp.Notifications" Version="7.1.3" />
+        <PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
+        <PackageVersion Include="Serilog.AspNetCore" Version="9.0.0" />
+
+        <!-- testing -->
+        <PackageVersion Include="xunit" Version="2.9.2" />
+        <PackageVersion Include="xunit.runner.visualstudio" Version="3.0.0" />
+        <PackageVersion Include="coverlet.collector" Version="6.0.2" />
+        <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+
+        <!-- avalonia -->
+        <PackageVersion Include="Avalonia" Version="$(AvaloniaVersion)" />
+        <PackageVersion Include="Avalonia.Desktop" Version="$(AvaloniaVersion)" />
+        <PackageVersion Include="Avalonia.Themes.Fluent" Version="$(AvaloniaVersion)" />
+        <PackageVersion Include="Avalonia.Fonts.Inter" Version="$(AvaloniaVersion)" />
+        <PackageVersion Include="Avalonia.Diagnostics" Version="$(AvaloniaVersion)" />
+        <PackageVersion Include="Avalonia.ReactiveUI" Version="$(AvaloniaVersion)" />
+    </ItemGroup>
+</Project>

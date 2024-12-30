@@ -1,28 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <PackageLicenseExpression>MIT</PackageLicenseExpression>
-        <Authors>Maximiliano Muller, Santiago Gerhart.</Authors>
-        <Company>Padoru Corp.</Company>
-        <Copyright>Copyright © 2023 Padoru Corp.</Copyright>
-        <Description>
-            This application purpose is to change the language of Black Desert Online to english.
-            When the game path is correctly set, the language updates automatically on every update.
-        </Description>
-        
-        <Product>BDOLanguageUpdater</Product>
-        <ProductName>BDOLanguageUpdater</ProductName>
-        <AssemblyTitle>BDOLanguageUpdater</AssemblyTitle>
-        <ProductVersion>2.1.0</ProductVersion>
-        <AssemblyVersion>2.1.0</AssemblyVersion>
-        <FileVersion>2.1.0</FileVersion>
-        
+        <TargetFrameworks>$(TargetFrameworks);net9.0-windows10.0.17763.0</TargetFrameworks>
         <OutputType>WinExe</OutputType>
-        <TargetFrameworks>net7.0;net7.0-windows10.0.17763.0</TargetFrameworks>
-        <Nullable>enable</Nullable>
         <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
         <ApplicationManifest>app.manifest</ApplicationManifest>
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
-        <DefineConstants Condition=" '$(TargetFramework)' == 'net7.0-windows10.0.17763.0' ">ON_W10</DefineConstants>
+        <DefineConstants Condition=" '$(TargetFramework)' == 'net9.0-windows10.0.17763.0' ">ON_WINDOWS</DefineConstants>
         <ApplicationIcon>Assets\icon.ico</ApplicationIcon>
     </PropertyGroup>
 
@@ -36,25 +19,21 @@
         </Content>
     </ItemGroup>
 
-
     <ItemGroup>
-        <PackageReference Include="Avalonia" Version="11.0.0" />
-        <PackageReference Include="Avalonia.Desktop" Version="11.0.0" />
-        <PackageReference Include="Avalonia.Themes.Fluent" Version="11.0.0" />
-        <PackageReference Include="Avalonia.Fonts.Inter" Version="11.0.0" />
+        <PackageReference Include="Avalonia"/>
+        <PackageReference Include="Avalonia.Desktop"/>
+        <PackageReference Include="Avalonia.Themes.Fluent"/>
+        <PackageReference Include="Avalonia.Fonts.Inter"/>
         <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
-        <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.0.0" />
-        <PackageReference Include="Avalonia.ReactiveUI" Version="11.0.0" />
-        <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
-        <PackageReference Include="Microsoft.Toolkit.Uwp.Notifications" Version="7.1.3" />
+        <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics"/>
+        <PackageReference Include="Avalonia.ReactiveUI"/>
+        <PackageReference Include="Microsoft.Toolkit.Uwp.Notifications" />
     </ItemGroup>
-
 
     <ItemGroup>
       <ProjectReference Include="..\BDOLanguageUpdater.Service\BDOLanguageUpdater.Service.csproj" />
       <ProjectReference Include="..\BDOLanguageUpdater.ShortcutGenerator\BDOLanguageUpdater.ShortcutGenerator.csproj" />
     </ItemGroup>
-
 
     <ItemGroup>
       <AvaloniaResource Update="Assets\icon.ico">
