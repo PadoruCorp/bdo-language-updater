@@ -1,18 +1,14 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
+using System.Buffers;
 using System.IO.Compression;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using Padoru.Core.Files;
 
 namespace BDOLanguageUpdater.Service.Serializer;
 
 public class LocSerializer : ISerializer  
 {
-    private const string Utf16LeBom = "\ufeff";
-    
+    private static readonly char[] sourceArray = ['+', '=', '-'];
+
     public async Task<byte[]> Serialize(object value)
     {
         var content = value.ToString() ?? throw new InvalidCastException();
@@ -41,7 +37,7 @@ public class LocSerializer : ISerializer
 
     private string AddSingleQuote(string str)
     {
-        if (new[] { '+', '=', '-' }.Any(ch => str.StartsWith(ch)))
+        if (sourceArray.Any(ch => str.StartsWith(ch)))
         {
             str = $"'{str}";
         }
@@ -87,7 +83,6 @@ public class LocSerializer : ISerializer
         var chunks = new List<byte[]>();
 
         var allLines = fileContent.Replace("\r","").Split("\n");
-
         foreach (var line in allLines)
         {
             if (string.IsNullOrEmpty(line))
@@ -114,8 +109,9 @@ public class LocSerializer : ISerializer
             WriteUInt8(buffer, ref i, Convert.ToByte(content[4]));
 
             // Write string content to the buffer as UTF-16LE
-            byte[] utf16Bytes = Encoding.Unicode.GetBytes(content[5]);
-            Array.Copy(utf16Bytes, 0, buffer, i, utf16Bytes.Length);
+            var destination = ArrayPool<byte>.Shared.Rent(content[5].Length * 4);
+            Encoding.Unicode.GetBytes(content[5], destination);
+            ArrayPool<byte>.Shared.Return(destination);
 
             chunks.Add(buffer);
         }
