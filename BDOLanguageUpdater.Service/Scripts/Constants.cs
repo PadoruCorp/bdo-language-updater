@@ -13,7 +13,7 @@ public class Constants
     public const string DEFAULT_BLACK_DESERT_CLIENT_PATH = "E:\\Steam\\steamapps\\common\\Black Desert Online";
     public const string DEFAULT_STRING_TO_REPLACE_ON_URL = "###";
     public const string DEFAULT_STRING_TO_REPLACE_ON_FILE = "##";
-    public const int DEFAULT_VERSION_NUMBER_INDEX = 1;
+    public const string DEFAULT_LANGUAGE_TO_TRANSLATE = "languagedata_en";
     public const bool DEFAULT_MINIMIZE_TO_TRAY = true;
     public const bool DEFAULT_OPEN_ON_STARTUP = false;
 

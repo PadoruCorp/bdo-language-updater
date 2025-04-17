@@ -65,16 +65,14 @@ public class LanguageFileUpdater
             throw new InvalidOperationException("The language file version could not be obtained.");
         }
 
-        var numbers = GetStringNumbers(file.Data);
-
-        var version = numbers[urlMetadataOptions.VersionNumberIndex];
-
-        return version;
+        return GetVersionNumber(file.Data);
     }
 
-    private string[] GetStringNumbers(string value)
+    private string GetVersionNumber(string value)
     {
-        var numbers = Regex.Split(value, urlMetadataOptions.Regex);
-        return numbers;
+        var match = Regex.Match(value, $@"{urlMetadataOptions.DefaultLanguageToTranslate}\.loc\s*\t\s*(\d+)");
+        if (!match.Success) throw new InvalidOperationException("The language file version could not be obtained.");
+        var number = int.Parse(match.Groups[1].Value);
+        return number.ToString();
     }
 }
