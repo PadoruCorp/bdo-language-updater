@@ -7,6 +7,7 @@
         <RollForward>Major</RollForward>
 
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
         <Authors>Maximiliano Muller, Santiago Gerhart.</Authors>
         <Company>Padoru Corp.</Company>
         <Copyright>Copyright © 2025 Padoru Corp.</Copyright>
@@ -18,9 +19,13 @@
         <Product>BDOLanguageUpdater</Product>
         <ProductName>BDOLanguageUpdater</ProductName>
         <AssemblyTitle>BDOLanguageUpdater</AssemblyTitle>
-        <ProductVersion>3.0.0</ProductVersion>
-        <AssemblyVersion>3.0.0</AssemblyVersion>
-        <FileVersion>3.0.0</FileVersion>
+        <VersionPrefix>2026.5.15</VersionPrefix>
+        <Version>$(VersionPrefix)</Version>
+        <PackageVersion>$(Version)</PackageVersion>
+        <ProductVersion>$(Version)</ProductVersion>
+        <InformationalVersion>$(Version)</InformationalVersion>
+        <AssemblyVersion>$(VersionPrefix).0</AssemblyVersion>
+        <FileVersion>$(VersionPrefix).0</FileVersion>
 
         <!-- https://github.com/NuGet/Home/wiki/Centrally-managing-NuGet-package-versions -->
         <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
