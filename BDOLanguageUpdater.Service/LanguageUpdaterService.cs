@@ -10,44 +10,60 @@ namespace BDOLanguageUpdater.Service;
 public class LanguageUpdaterService : BackgroundService
 {
     private readonly ILogger<LanguageUpdaterService> logger;
-    private readonly IWritableOptions<UserPreferencesOptions> userPreferencesOptions;
     private readonly LanguageFileWatcher watcher;
     private readonly IServiceProvider serviceProvider;
 
     public event Action? OnFileUpdateStart;
     public event Action? OnFileUpdateFinish;
+    public event Action<LanguageUpdateResult>? OnFileUpdateComplete;
 
     public LanguageUpdaterService(ILogger<LanguageUpdaterService> logger,
-                  IWritableOptions<UserPreferencesOptions> userPreferencesOptions,
                   LanguageFileWatcher watcher,
                   IServiceProvider serviceProvider)
     {
         this.logger = logger;
-        this.userPreferencesOptions = userPreferencesOptions;
         this.watcher = watcher;
         this.serviceProvider = serviceProvider;
 
         watcher.OnFileChanged += OnFileChanged;
     }
 
-    public async Task UpdateLanguage()
+    public async Task<LanguageUpdateResult> UpdateLanguage(string? languageCodeToReplace = null)
     {
         OnFileUpdateStart?.Invoke();
         watcher.OnFileChanged -= OnFileChanged;
         
         logger.LogInformation("Updating file: {time}", DateTimeOffset.Now);
 
-        await using var scope = serviceProvider.CreateAsyncScope();
+        LanguageUpdateResult result;
+        try
+        {
+            await using var scope = serviceProvider.CreateAsyncScope();
 
-        var fileUpdater = scope.ServiceProvider.GetRequiredService<LanguageFileUpdater>();
+            var fileUpdater = scope.ServiceProvider.GetRequiredService<LanguageFileUpdater>();
 
-        await fileUpdater.UpdateFile();
+            result = await fileUpdater.UpdateFile(languageCodeToReplace).ConfigureAwait(false);
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "Could not update language file.");
+            result = LanguageUpdateResult.Failure($"Could not update the language file: {exception.Message}");
+        }
+        finally
+        {
+            watcher.OnFileChanged += OnFileChanged;
+        }
 
-        logger.LogInformation("File updated: {time}", DateTimeOffset.Now);
+        logger.LogInformation("File update completed: {time}", DateTimeOffset.Now);
 
-        OnFileUpdateFinish?.Invoke();
-        
-        watcher.OnFileChanged += OnFileChanged;
+        if (result.Succeeded)
+        {
+            OnFileUpdateFinish?.Invoke();
+        }
+
+        OnFileUpdateComplete?.Invoke(result);
+
+        return result;
     }
 
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
@@ -57,6 +73,6 @@ public class LanguageUpdaterService : BackgroundService
 
     private async void OnFileChanged()
     {
-        await UpdateLanguage();
+        await UpdateLanguage().ConfigureAwait(false);
     }
 }

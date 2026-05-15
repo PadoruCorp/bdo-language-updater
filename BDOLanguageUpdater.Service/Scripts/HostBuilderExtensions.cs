@@ -17,6 +17,7 @@ public static class HostBuilderExtensions
         services.AddHostedService((sp) => sp.GetRequiredService<LanguageUpdaterService>());
         services.AddSingleton<LanguageUpdaterService>();
         services.AddSingleton<LanguageFileWatcher>();
+        services.AddSingleton<LanguageFileDiscovery>();
         services.AddScoped<LanguageFileUpdater>();
 
         // Options

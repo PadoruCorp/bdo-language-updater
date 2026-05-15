@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
@@ -10,6 +11,7 @@ namespace BDOLanguageUpdater.WPF.Views;
 
 public partial class MainWindow : Window
 {
+    private readonly LanguageFileDiscovery languageFileDiscovery;
     private readonly LanguageFileWatcher watcher;
     private readonly MainWindowViewModel viewModel;
     private readonly IWritableOptions<UserPreferencesOptions> userPreferencesOptions;
@@ -18,7 +20,9 @@ public partial class MainWindow : Window
 
     public bool ExitingFromTray { get; set; } = false;
 
-    public MainWindow(MainWindowViewModel viewModel, 
+    public MainWindow(
+        MainWindowViewModel viewModel,
+        LanguageFileDiscovery languageFileDiscovery,
         LanguageFileWatcher watcher,
         IWritableOptions<UserPreferencesOptions> userPreferencesOptions,
         LanguageUpdaterService languageUpdaterService,
@@ -28,75 +32,138 @@ public partial class MainWindow : Window
 
         DataContext = viewModel;
 
+        this.languageFileDiscovery = languageFileDiscovery;
         this.watcher = watcher;
         this.viewModel = viewModel;
         this.userPreferencesOptions = userPreferencesOptions;
         this.languageUpdaterService = languageUpdaterService;
         this.startupHelper = startupHelper;
+
         viewModel.GeneralTabViewModel.BDOPath = userPreferencesOptions.Value.BDOClientPath;
         viewModel.AdvancedTabViewModel.HideToTrayOnClose = userPreferencesOptions.Value.HideToTrayOnClose;
         viewModel.AdvancedTabViewModel.OpenOnStartup = userPreferencesOptions.Value.OpenOnStartup;
-        
+
+        RefreshAvailableLanguages(persistSelectedLanguage: false);
+
+        viewModel.GeneralTabViewModel.ObservableForProperty(vm => vm.SelectedLanguage).Subscribe(LanguageSelectionChanged);
         viewModel.AdvancedTabViewModel.ObservableForProperty(vm => vm.HideToTrayOnClose).Subscribe(HideToTrayOnCloseChanged);
         viewModel.AdvancedTabViewModel.ObservableForProperty(vm => vm.OpenOnStartup).Subscribe(OpenOnStartupChanged);
     }
 
+    private void LanguageSelectionChanged(IObservedChange<GeneralTabViewModel, GameLanguageFile?> obj)
+    {
+        if (obj.Value is null)
+        {
+            return;
+        }
+
+        userPreferencesOptions.Update(options => { options.LanguageCodeToReplace = obj.Value.Code; });
+        viewModel.GeneralTabViewModel.StatusMessage =
+            $"{obj.Value.DisplayName} will be replaced with the latest official English localization.";
+    }
+
     private void HideToTrayOnCloseChanged(IObservedChange<AdvancedTabViewModel, bool> obj)
     {
-        this.userPreferencesOptions.Update(options => { options.HideToTrayOnClose = obj.Value; });
+        userPreferencesOptions.Update(options => { options.HideToTrayOnClose = obj.Value; });
     }
 
     private void OpenOnStartupChanged(IObservedChange<AdvancedTabViewModel, bool> obj)
     {
-        this.userPreferencesOptions.Update(options => { options.OpenOnStartup = obj.Value; });
+        userPreferencesOptions.Update(options => { options.OpenOnStartup = obj.Value; });
 
         startupHelper.SetStartupOnBoot(obj.Value);
     }
 
     private async void Browse(object sender, RoutedEventArgs args)
     {
-        // Get top level from the current control. Alternatively, you can use Window reference instead.
         var topLevel = GetTopLevel(this);
 
         if (topLevel is null) throw new InvalidOperationException();
 
-        // Start async operation to open the dialog.
-        var files = await topLevel.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions()
+        var folders = await topLevel.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
         {
-            Title = "Select Folder",
+            Title = "Select Black Desert Online Folder",
             AllowMultiple = false
         });
 
-        if (files.Count < 1) return;
-        
-        // Open reading stream from the first file.
-        var storageFolder = files[0];
+        if (folders.Count < 1) return;
 
-        var path = storageFolder.Path.LocalPath;
+        var path = folders[0].Path.LocalPath;
 
-        watcher.SetPath(path);
         userPreferencesOptions.Update(options => { options.BDOClientPath = path; });
         viewModel.GeneralTabViewModel.BDOPath = path;
+        watcher.SetPath(languageFileDiscovery.GetAdsPath(path));
+        RefreshAvailableLanguages(persistSelectedLanguage: true);
+    }
+
+    private void ScanLanguages(object sender, RoutedEventArgs args)
+    {
+        RefreshAvailableLanguages(persistSelectedLanguage: true);
     }
 
     private async void UpdateLanguage(object sender, RoutedEventArgs args)
     {
-        UpdateLanguageButton.IsEnabled = false;
+        var general = viewModel.GeneralTabViewModel;
+        if (general.SelectedLanguage is null)
+        {
+            general.StatusMessage = "Choose one detected installed language before updating.";
+            return;
+        }
 
-        await languageUpdaterService.UpdateLanguage();
+        var selectedLanguageCode = general.SelectedLanguage.Code;
+        var selectedLanguageName = general.SelectedLanguage.DisplayName;
 
-        UpdateLanguageButton.IsEnabled = true;
+        general.IsUpdating = true;
+        general.StatusMessage =
+            $"Downloading the latest official English localization and replacing {selectedLanguageName}.";
+
+        try
+        {
+            var result = await Task.Run(() => languageUpdaterService.UpdateLanguage(selectedLanguageCode));
+            general.StatusMessage = result.Message;
+        }
+        finally
+        {
+            general.IsUpdating = false;
+        }
+    }
+
+    private void RefreshAvailableLanguages(bool persistSelectedLanguage)
+    {
+        var general = viewModel.GeneralTabViewModel;
+        var preferredLanguageCode = general.SelectedLanguage?.Code ?? userPreferencesOptions.Value.LanguageCodeToReplace;
+        var languages = languageFileDiscovery.GetAvailableLanguages(general.BDOPath);
+
+        general.SetAvailableLanguages(languages, preferredLanguageCode);
+
+        if (general.SelectedLanguage is not null)
+        {
+            if (persistSelectedLanguage)
+            {
+                userPreferencesOptions.Update(options => { options.LanguageCodeToReplace = general.SelectedLanguage.Code; });
+            }
+
+            var languageList = string.Join(", ", languages.Select(language => language.DisplayName));
+            general.StatusMessage =
+                $"Detected {languageList}. The selected language will be replaced with English.";
+            return;
+        }
+
+        var adsPath = languageFileDiscovery.GetAdsPath(general.BDOPath);
+        general.StatusMessage = Directory.Exists(adsPath)
+            ? $"No replaceable language files were found in '{adsPath}'. Expected languagedata_*.loc files other than English."
+            : $"Could not find the ads folder at '{adsPath}'. Select the Black Desert Online folder and scan again.";
     }
 
     protected override void OnClosing(WindowClosingEventArgs e)
     {
         base.OnClosing(e);
-        
+
         if (ExitingFromTray)
         {
             return;
         }
-        
+
         if (this.IsVisible && !viewModel.AdvancedTabViewModel.HideToTrayOnClose)
         {
             return;

@@ -22,7 +22,7 @@ public class HttpsFileSystem : IFileSystem
     {
         var path = FileUtils.PathFromUri(uri);
         var requestUri = "https://" + path;
-        var response = await this.httpClient.GetAsync(requestUri);
+        var response = await this.httpClient.GetAsync(requestUri).ConfigureAwait(false);
         return response.IsSuccessStatusCode;
     }
 
@@ -30,11 +30,11 @@ public class HttpsFileSystem : IFileSystem
     {
         var path = FileUtils.PathFromUri(uri);
         var requestUri = "https://" + path;
-        var response = await this.httpClient.GetAsync(requestUri);
+        var response = await this.httpClient.GetAsync(requestUri).ConfigureAwait(false);
 
         if (response.IsSuccessStatusCode)
         {
-            var data = await response.Content.ReadAsByteArrayAsync();
+            var data = await response.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
             this.logger.LogTrace($"Read file at path '{requestUri}'.");
             return new File<byte[]>(uri, data);
         }
@@ -47,7 +47,7 @@ public class HttpsFileSystem : IFileSystem
         var path = FileUtils.PathFromUri(file.Uri);
         var requestUri = "https://" + path;
         var content = new ByteArrayContent(file.Data);
-        var response = await this.httpClient.PostAsync(requestUri, content);
+        var response = await this.httpClient.PostAsync(requestUri, content).ConfigureAwait(false);
 
         if (response.IsSuccessStatusCode)
         {
@@ -63,7 +63,7 @@ public class HttpsFileSystem : IFileSystem
     {
         var path = FileUtils.PathFromUri(uri);
         var requestUri = "https://" + path;
-        var response = await this.httpClient.DeleteAsync(requestUri);
+        var response = await this.httpClient.DeleteAsync(requestUri).ConfigureAwait(false);
 
         if (response.IsSuccessStatusCode)
         {

@@ -65,24 +65,24 @@ namespace Padoru.Core.Files
 
         public async Task<bool> Exists(string uri)
         {
-            return await GetProtocol(uri).Exists(uri);
+            return await GetProtocol(uri).Exists(uri).ConfigureAwait(false);
         }
 
         public async Task<File<T>> Read<T>(string uri)
         {
-            var value = await GetProtocol(uri).Read<T>(uri);
+            var value = await GetProtocol(uri).Read<T>(uri).ConfigureAwait(false);
 
             return new File<T>(uri, (T)value);
         }
 
         public async Task<File<T>> Write<T>(string uri, T value)
         {
-            return await GetProtocol(uri).Write<T>(uri, value);
+            return await GetProtocol(uri).Write<T>(uri, value).ConfigureAwait(false);
         }
 
         public async Task Delete(string uri)
         {
-            await GetProtocol(uri).Delete(uri);
+            await GetProtocol(uri).Delete(uri).ConfigureAwait(false);
         }
 
         private IProtocol GetProtocol(string uri)

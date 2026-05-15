@@ -37,7 +37,7 @@ public class Tests : BaseHostTests
         var languageFileUpdater = scope.ServiceProvider.GetRequiredService<LanguageFileUpdater>();
 
         // Act
-        var exception = await Record.ExceptionAsync(languageFileUpdater.UpdateFile);
+        var exception = await Record.ExceptionAsync(async () => await languageFileUpdater.UpdateFile());
 
         // Assert
         Assert.Null(exception);

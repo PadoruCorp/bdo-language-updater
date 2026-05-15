@@ -19,7 +19,7 @@ internal static class LocCompression
         var totalRead = 0;
         while (totalRead < result.Length)
         {
-            var read = await deflateStream.ReadAsync(result.AsMemory(totalRead));
+            var read = await deflateStream.ReadAsync(result.AsMemory(totalRead)).ConfigureAwait(false);
             if (read == 0)
             {
                 break;

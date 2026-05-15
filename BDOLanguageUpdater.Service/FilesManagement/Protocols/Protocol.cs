@@ -21,7 +21,7 @@ namespace Padoru.Core.Files
                 throw new ArgumentException("The provided uri is null or empty");
             }
 
-            return await fileSystem.Exists(uri);
+            return await fileSystem.Exists(uri).ConfigureAwait(false);
         }
 
         public async Task<object> Read<T>(string uri)
@@ -31,11 +31,11 @@ namespace Padoru.Core.Files
                 throw new ArgumentException("The provided uri is null or empty");
             }
                 
-            var file = await fileSystem.Read(uri);
+            var file = await fileSystem.Read(uri).ConfigureAwait(false);
                     
             var bytes = file.Data;
 
-            var result = await serializer.Deserialize(typeof(T), bytes, uri);
+            var result = await serializer.Deserialize(typeof(T), bytes, uri).ConfigureAwait(false);
 
             return result;
         }
@@ -47,11 +47,11 @@ namespace Padoru.Core.Files
                 throw new ArgumentException("The provided uri is null or empty");
             }
                 
-            var bytes = await serializer.Serialize(value);
+            var bytes = await serializer.Serialize(value).ConfigureAwait(false);
 
             var newFile = new File<byte[]>(uri, bytes);
 
-            await fileSystem.Write(newFile);
+            await fileSystem.Write(newFile).ConfigureAwait(false);
 
             return new File<T>(uri, value);
         }
@@ -63,12 +63,12 @@ namespace Padoru.Core.Files
                 throw new ArgumentException("The provided uri is null or empty");
             }
                 
-            if (!await fileSystem.Exists(uri))
+            if (!await fileSystem.Exists(uri).ConfigureAwait(false))
             {
                 throw new Exception($"Cannot delete file because it does not exists: {uri}");
             }
             
-            await fileSystem.Delete(uri);
+            await fileSystem.Delete(uri).ConfigureAwait(false);
         }
     }
 }

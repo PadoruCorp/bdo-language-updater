@@ -3,38 +3,140 @@
         xmlns:vm="using:BDOLanguageUpdater.WPF.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="250"
+        mc:Ignorable="d" d:DesignWidth="760" d:DesignHeight="520"
         x:Class="BDOLanguageUpdater.WPF.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Title="BDO Language Updater"
-        Width="700"
-        Height="400"
+        Width="760"
+        Height="520"
+        MinWidth="700"
+        MinHeight="480"
         Icon="/Assets/icon.ico">
 
     <Design.DataContext>
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
-    <TabControl>
-		
-        <TabItem Header="General" >
-          <StackPanel DataContext="{Binding GeneralTabViewModel}" Orientation="Vertical" Spacing="10" Margin="10" VerticalAlignment="Top">
-            <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Top">
-                <TextBlock Text="BDO Path:" TextAlignment="Right" VerticalAlignment="Center"/>
-                <TextBox Text="{Binding BDOPath}"  Watermark="{Binding BDOPath}" Width="400" VerticalAlignment="Center"/>
-                <Button Content="Browse" Click="Browse" VerticalAlignment="Center"/>
-            </StackPanel>
-            <Button Name="UpdateLanguageButton" Content="Update Language" Click="UpdateLanguage" VerticalAlignment="Center"/>
-          </StackPanel>
-        </TabItem>
+    <Window.Styles>
+        <Style Selector="TextBlock.Label">
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Opacity" Value="0.72"/>
+        </Style>
+        <Style Selector="TextBlock.Value">
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+        <Style Selector="Border.Panel">
+            <Setter Property="Background" Value="#181B18"/>
+            <Setter Property="BorderBrush" Value="#2F3932"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="18"/>
+        </Style>
+    </Window.Styles>
 
-        <TabItem Header="Advanced" >
-            <StackPanel DataContext="{Binding AdvancedTabViewModel}" Spacing="10">
-                <ToggleSwitch Content="Hide to Tray On Close" IsChecked="{Binding HideToTrayOnClose}" Margin="0,5,0,0"/>
-                <ToggleSwitch Content="Open On Startup" IsChecked="{Binding OpenOnStartup}" Margin="0,5,0,0"/>
-            </StackPanel>
-        </TabItem>
-		
-    </TabControl>
+    <Grid RowDefinitions="Auto,*" Background="#101210">
+        <Border Grid.Row="0" Background="#161916" BorderBrush="#2F3932" BorderThickness="0,0,0,1" Padding="22,18">
+            <Grid ColumnDefinitions="*,Auto">
+                <StackPanel Spacing="3">
+                    <TextBlock Text="BDO Language Updater" FontSize="24" FontWeight="SemiBold"/>
+                    <TextBlock Text="Replace one installed regional language file with the latest official English localization."
+                               Opacity="0.78"/>
+                </StackPanel>
+                <TextBlock Grid.Column="1"
+                           Text="Target: English"
+                           VerticalAlignment="Center"
+                           FontSize="15"
+                           FontWeight="SemiBold"
+                           Foreground="#96D2B0"/>
+            </Grid>
+        </Border>
 
+        <TabControl Grid.Row="1" Margin="18">
+            <TabItem Header="General">
+                <Grid DataContext="{Binding GeneralTabViewModel}"
+                      RowDefinitions="*,Auto"
+                      Margin="0,14,0,0">
+
+                    <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
+                        <StackPanel Spacing="14" Margin="0,0,0,14">
+                            <Border Classes="Panel">
+                                <Grid RowDefinitions="Auto,Auto">
+                                    <TextBlock Classes="Label" Text="Black Desert Online folder"/>
+                                    <Grid Grid.Row="1" ColumnDefinitions="*,Auto,Auto" Margin="0,8,0,0">
+                                        <TextBox Text="{Binding BDOPath}" IsReadOnly="True" Watermark="Select the Black Desert Online folder"/>
+                                        <Button Grid.Column="1" Content="Browse" Click="Browse" Margin="8,0,0,0"/>
+                                        <Button Grid.Column="2" Content="Scan" Click="ScanLanguages" Margin="8,0,0,0"/>
+                                    </Grid>
+                                </Grid>
+                            </Border>
+
+                            <Border Classes="Panel">
+                                <Grid ColumnDefinitions="*,Auto,*">
+                                    <StackPanel Spacing="8">
+                                        <TextBlock Classes="Label" Text="Installed language to replace"/>
+                                        <ComboBox ItemsSource="{Binding AvailableLanguages}"
+                                                  SelectedItem="{Binding SelectedLanguage}"
+                                                  MinWidth="240"
+                                                  HorizontalAlignment="Stretch"
+                                                  PlaceholderText="No languages found"/>
+                                        <TextBlock Text="{Binding SelectedLanguageDescription}" Opacity="0.72"/>
+                                    </StackPanel>
+
+                                    <TextBlock Grid.Column="1"
+                                               Text=">"
+                                               FontSize="28"
+                                               FontWeight="SemiBold"
+                                               VerticalAlignment="Center"
+                                               Foreground="#96D2B0"
+                                               Margin="18,0"/>
+
+                                    <StackPanel Grid.Column="2" Spacing="8">
+                                        <TextBlock Classes="Label" Text="Replacement language"/>
+                                        <TextBlock Classes="Value" Text="{Binding TargetLanguageDescription}"/>
+                                        <TextBlock Text="Latest official BDO English localization file." Opacity="0.72"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+
+                        </StackPanel>
+                    </ScrollViewer>
+
+                    <Border Grid.Row="1" Background="#101210" BorderBrush="#2F3932" BorderThickness="0,1,0,0" Padding="0,14,0,0">
+                        <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,Auto" VerticalAlignment="Bottom">
+                            <TextBlock Text="{Binding StatusMessage}"
+                                       TextWrapping="Wrap"
+                                       FontSize="13"
+                                       Opacity="0.82"
+                                       Margin="0,0,16,8"/>
+                            <ProgressBar Grid.Row="1"
+                                         IsIndeterminate="True"
+                                         IsVisible="{Binding IsUpdating}"
+                                         Height="4"
+                                         VerticalAlignment="Center"
+                                         Margin="0,0,16,0"/>
+                            <Button Grid.Column="1"
+                                    Grid.RowSpan="2"
+                                    Content="Replace Selected Language With English"
+                                    Click="UpdateLanguage"
+                                    IsEnabled="{Binding CanUpdate}"
+                                    VerticalAlignment="Center"
+                                    Padding="18,9"/>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Advanced">
+                <StackPanel DataContext="{Binding AdvancedTabViewModel}" Spacing="12" Margin="0,14,0,0">
+                    <Border Classes="Panel">
+                        <StackPanel Spacing="10">
+                            <ToggleSwitch Content="Hide to tray on close" IsChecked="{Binding HideToTrayOnClose}"/>
+                            <ToggleSwitch Content="Open on startup" IsChecked="{Binding OpenOnStartup}"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </TabItem>
+        </TabControl>
+    </Grid>
 </Window>

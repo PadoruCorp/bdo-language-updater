@@ -13,6 +13,8 @@ public class LanguageFileUpdater
 {
     private ILogger<LanguageUpdaterService> logger;
     private readonly IFileManager fileManager;
+    private readonly LanguageFileDiscovery languageFileDiscovery;
+    private readonly UserPreferencesOptions userPreferencesOptions;
     private UrlMetadataOptions urlMetadataOptions;
     private string blackDesertFilesPath;
 
@@ -20,43 +22,64 @@ public class LanguageFileUpdater
         ILogger<LanguageUpdaterService> logger,
         IOptionsSnapshot<UrlMetadataOptions> urlMetadataOptions,
         IOptionsSnapshot<UserPreferencesOptions> userPreferencesOptions,
-        IFileManager fileManager)
+        IFileManager fileManager,
+        LanguageFileDiscovery languageFileDiscovery)
     {
         this.logger = logger;
         this.fileManager = fileManager;
+        this.languageFileDiscovery = languageFileDiscovery;
+        this.userPreferencesOptions = userPreferencesOptions.Value;
         this.urlMetadataOptions = urlMetadataOptions.Value;
 
-        blackDesertFilesPath = Path.Combine(userPreferencesOptions.Value.BDOClientPath,
-            Constants.BLACK_DESERT_LANGUAGE_FILES_PATH);
+        blackDesertFilesPath = languageFileDiscovery.GetAdsPath(this.userPreferencesOptions.BDOClientPath);
     }
 
-    public async Task UpdateFile()
+    public async Task<LanguageUpdateResult> UpdateFile(string? languageCodeToReplace = null)
     {
+        var selectedLanguageCode = string.IsNullOrWhiteSpace(languageCodeToReplace)
+            ? userPreferencesOptions.LanguageCodeToReplace
+            : languageCodeToReplace;
+
         if (!Directory.Exists(blackDesertFilesPath))
         {
             logger.LogError($"Cannot download file for unexisting path: {blackDesertFilesPath}");
-            return;
+            return LanguageUpdateResult.Failure(
+                $"Could not find the Black Desert Online ads folder at '{blackDesertFilesPath}'. Select the game folder and scan again.",
+                selectedLanguageCode);
+        }
+
+        var languageToReplace = languageFileDiscovery.FindLanguage(
+            userPreferencesOptions.BDOClientPath,
+            selectedLanguageCode);
+
+        if (languageToReplace is null)
+        {
+            logger.LogError($"Could not find language file to replace: {selectedLanguageCode}");
+            return LanguageUpdateResult.Failure(
+                $"Could not find languagedata_{selectedLanguageCode}.loc in '{blackDesertFilesPath}'. Choose one of the detected installed languages.",
+                selectedLanguageCode);
         }
         
         var versionUri = Constants.HTTPS_STRING_PROTOCOL_HEADER + urlMetadataOptions.VersionUrl;
-        var version = await GetVersion(versionUri);
+        var version = await GetVersion(versionUri).ConfigureAwait(false);
 
         var downloadedFileUri = Constants.HTTPS_LOCALIZATION_PROTOCOL_HEADER +
                             urlMetadataOptions.FileUrl.Replace(urlMetadataOptions.StringToReplaceOnUrl, version);
-        var localFileUri = Constants.LOCAL_LOCALIZATION_PROTOCOL_HEADER + Path.Combine(blackDesertFilesPath,
-            Constants.BLACK_DESERT_LANGUAGE_FILE_NAME.Replace(Constants.DEFAULT_STRING_TO_REPLACE_ON_FILE, "es"));
+        var localFileUri = Constants.LOCAL_LOCALIZATION_PROTOCOL_HEADER + languageToReplace.FullPath;
 
-        var downloadedFileContent = await fileManager.Read<string>(downloadedFileUri);
-        var localFileContent = await fileManager.Read<string>(localFileUri);
+        var downloadedFileContent = await fileManager.Read<string>(downloadedFileUri).ConfigureAwait(false);
+        var localFileContent = await fileManager.Read<string>(localFileUri).ConfigureAwait(false);
 
         var finalFileContent = DictionaryUtils.Merge(downloadedFileContent.Data, localFileContent.Data);
 
-        await fileManager.Write(localFileUri, finalFileContent);
+        await fileManager.Write(localFileUri, finalFileContent).ConfigureAwait(false);
+
+        return LanguageUpdateResult.Success(languageToReplace);
     }
 
     public async Task<string> GetVersion(string uri)
     {
-        var file = await fileManager.Read<string>(uri);
+        var file = await fileManager.Read<string>(uri).ConfigureAwait(false);
 
         if (file is null)
         {
