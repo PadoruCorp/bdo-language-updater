@@ -14,10 +14,9 @@ public static class HostBuilderExtensions
         services.AddHttpClient(Constants.HTTP_CLIENT_NAME);
 
         // Services
-        services.AddHostedService((sp) => sp.GetRequiredService<LanguageUpdaterService>());
         services.AddSingleton<LanguageUpdaterService>();
-        services.AddSingleton<LanguageFileWatcher>();
         services.AddSingleton<LanguageFileDiscovery>();
+        services.AddSingleton<LanguageUpdateMetadataStore>();
         services.AddScoped<LanguageFileUpdater>();
 
         // Options
@@ -33,7 +32,7 @@ public static class HostBuilderExtensions
         hostBuilder.UseSerilog((_, configuration) =>
         {
             configuration
-                .WriteTo.File(Constants.LOGS_FILE_NAME, LogEventLevel.Information)
+                .WriteTo.File(Path.Combine(AppContext.BaseDirectory, Constants.LOGS_FILE_NAME), LogEventLevel.Information)
                 .WriteTo.Debug();
         });
 

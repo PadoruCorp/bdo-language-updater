@@ -16,5 +16,7 @@ public static class HostBuilderContextExtensions
         // UI
         services.AddSingleton<MainWindow>();
         services.AddSingleton<MainWindowViewModel>();
+        services.AddSingleton<AutoRepairScheduler>();
+        services.AddSingleton<GameLauncher>();
     }
 }

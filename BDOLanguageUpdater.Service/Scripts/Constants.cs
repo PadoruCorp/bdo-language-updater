@@ -17,11 +17,15 @@ public class Constants
     public const string DEFAULT_TARGET_LANGUAGE_CODE = "en";
     public const string DEFAULT_LANGUAGE_CODE_TO_REPLACE = "es";
     public const bool DEFAULT_MINIMIZE_TO_TRAY = true;
+    public const bool DEFAULT_AUTO_REPAIR_ENABLED = false;
+    public const string DEFAULT_AUTO_REPAIR_DAY = "Thursday";
+    public const string STEAM_GAME_LAUNCH_TARGET = "steam://rungameid/582660";
 
     // Localization file
     public const string BLACK_DESERT_LANGUAGE_FILES_PATH = "ads";
     public const string BLACK_DESERT_LANGUAGE_FILE_NAME = "languagedata_##.loc";
     public const string BLACK_DESERT_LANGUAGE_FILE_EXTENSION = ".loc";
+    public const string BLACK_DESERT_LAUNCHER_FILE_NAME = "BlackDesertLauncher.exe";
 
     // Preferences
     public const string APP_LOCAL_FOLDER = "BDOLanguageUpdater";

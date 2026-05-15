@@ -39,7 +39,9 @@ public sealed class SystemTextJsonSerializerTests
                   "UserPreferences": {
                     "BDOClientPath": "C:\\BDO",
                     "LanguageCodeToReplace": "es",
-                    "HideToTrayOnClose": true
+                    "HideToTrayOnClose": true,
+                    "AutoRepairEnabled": false,
+                    "AutoRepairDay": "Thursday"
                   },
                   "Logging": {
                     "LogLevel": {
@@ -59,6 +61,8 @@ public sealed class SystemTextJsonSerializerTests
             writableOptions.Update(options =>
             {
                 options.LanguageCodeToReplace = "pt";
+                options.AutoRepairEnabled = true;
+                options.AutoRepairDay = "Friday";
             });
 
             var json = JsonNode.Parse(File.ReadAllText(settingsPath))!.AsObject();
@@ -68,6 +72,8 @@ public sealed class SystemTextJsonSerializerTests
             Assert.Equal("C:\\BDO", userPreferences["BDOClientPath"]!.GetValue<string>());
             Assert.Equal("pt", userPreferences["LanguageCodeToReplace"]!.GetValue<string>());
             Assert.True(userPreferences["HideToTrayOnClose"]!.GetValue<bool>());
+            Assert.True(userPreferences["AutoRepairEnabled"]!.GetValue<bool>());
+            Assert.Equal("Friday", userPreferences["AutoRepairDay"]!.GetValue<string>());
             Assert.Equal("Information", logging["LogLevel"]!["Default"]!.GetValue<string>());
         }
         finally

@@ -33,6 +33,29 @@
             <Setter Property="CornerRadius" Value="8"/>
             <Setter Property="Padding" Value="18"/>
         </Style>
+        <Style Selector="Button.Primary">
+            <Setter Property="Background" Value="#2F7D54"/>
+            <Setter Property="BorderBrush" Value="#46A46E"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+        <Style Selector="Button.Primary:pointerover">
+            <Setter Property="Background" Value="#378F61"/>
+            <Setter Property="BorderBrush" Value="#52B77D"/>
+        </Style>
+        <Style Selector="Button.Primary:pressed">
+            <Setter Property="Background" Value="#246A45"/>
+            <Setter Property="BorderBrush" Value="#3B8F60"/>
+        </Style>
+        <Style Selector="Button.Secondary">
+            <Setter Property="Background" Value="#1B1F1B"/>
+            <Setter Property="BorderBrush" Value="#3B473F"/>
+            <Setter Property="Foreground" Value="#E7ECE6"/>
+        </Style>
+        <Style Selector="Button.Secondary:pointerover">
+            <Setter Property="Background" Value="#232923"/>
+            <Setter Property="BorderBrush" Value="#536158"/>
+        </Style>
     </Window.Styles>
 
     <Grid RowDefinitions="Auto,*" Background="#101210">
@@ -103,25 +126,39 @@
                     </ScrollViewer>
 
                     <Border Grid.Row="1" Background="#101210" BorderBrush="#2F3932" BorderThickness="0,1,0,0" Padding="0,14,0,0">
-                        <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,Auto" VerticalAlignment="Bottom">
+                        <Grid RowDefinitions="Auto,Auto,Auto" VerticalAlignment="Bottom">
                             <TextBlock Text="{Binding StatusMessage}"
                                        TextWrapping="Wrap"
                                        FontSize="13"
                                        Opacity="0.82"
-                                       Margin="0,0,16,8"/>
+                                       Margin="0,0,0,8"/>
                             <ProgressBar Grid.Row="1"
                                          IsIndeterminate="True"
                                          IsVisible="{Binding IsUpdating}"
                                          Height="4"
                                          VerticalAlignment="Center"
-                                         Margin="0,0,16,0"/>
-                            <Button Grid.Column="1"
-                                    Grid.RowSpan="2"
-                                    Content="Replace Selected Language With English"
-                                    Click="UpdateLanguage"
-                                    IsEnabled="{Binding CanUpdate}"
-                                    VerticalAlignment="Center"
-                                    Padding="18,9"/>
+                                         Margin="0,0,0,12"/>
+                            <StackPanel Grid.Row="2"
+                                        Orientation="Horizontal"
+                                        Spacing="8"
+                                        HorizontalAlignment="Right"
+                                        VerticalAlignment="Center">
+                                <Button Content="Update And Launch Steam"
+                                        Click="UpdateAndLaunchSteam"
+                                        IsEnabled="{Binding CanUpdate}"
+                                        Classes="Secondary"
+                                        Padding="18,9"/>
+                                <Button Content="Update And Launch Launcher"
+                                        Click="UpdateAndLaunchStandaloneLauncher"
+                                        IsEnabled="{Binding CanUpdate}"
+                                        Classes="Secondary"
+                                        Padding="18,9"/>
+                                <Button Content="Update Language"
+                                        Click="UpdateLanguage"
+                                        IsEnabled="{Binding CanUpdate}"
+                                        Classes="Primary"
+                                        Padding="18,9"/>
+                            </StackPanel>
                         </Grid>
                     </Border>
                 </Grid>
@@ -133,6 +170,34 @@
                         <StackPanel Spacing="10">
                             <ToggleSwitch Content="Hide to tray on close" IsChecked="{Binding HideToTrayOnClose}"/>
                         </StackPanel>
+                    </Border>
+
+                    <Border Classes="Panel">
+                        <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="*,220">
+                            <ToggleSwitch Content="Auto update after game updates"
+                                          IsChecked="{Binding AutoRepairEnabled}"
+                                          IsEnabled="{Binding IsAutoRepairSupported}"/>
+
+                            <TextBlock Grid.Row="1"
+                                       Classes="Label"
+                                       Text="Maintenance day"
+                                       VerticalAlignment="Center"
+                                       Margin="0,14,12,0"/>
+                            <ComboBox Grid.Row="1"
+                                      Grid.Column="1"
+                                      ItemsSource="{Binding MaintenanceDays}"
+                                      SelectedItem="{Binding SelectedMaintenanceDay}"
+                                      IsEnabled="{Binding CanEditAutoRepairSchedule}"
+                                      Margin="0,10,0,0"/>
+
+                            <TextBlock Grid.Row="2"
+                                       Grid.ColumnSpan="2"
+                                       Text="{Binding AutoRepairStatus}"
+                                       TextWrapping="Wrap"
+                                       FontSize="13"
+                                       Opacity="0.76"
+                                       Margin="0,12,0,0"/>
+                        </Grid>
                     </Border>
                 </StackPanel>
             </TabItem>

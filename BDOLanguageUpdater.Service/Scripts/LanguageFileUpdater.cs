@@ -14,6 +14,7 @@ public class LanguageFileUpdater
     private ILogger<LanguageUpdaterService> logger;
     private readonly IFileManager fileManager;
     private readonly LanguageFileDiscovery languageFileDiscovery;
+    private readonly LanguageUpdateMetadataStore metadataStore;
     private readonly UserPreferencesOptions userPreferencesOptions;
     private UrlMetadataOptions urlMetadataOptions;
     private string blackDesertFilesPath;
@@ -23,11 +24,13 @@ public class LanguageFileUpdater
         IOptionsSnapshot<UrlMetadataOptions> urlMetadataOptions,
         IOptionsSnapshot<UserPreferencesOptions> userPreferencesOptions,
         IFileManager fileManager,
-        LanguageFileDiscovery languageFileDiscovery)
+        LanguageFileDiscovery languageFileDiscovery,
+        LanguageUpdateMetadataStore metadataStore)
     {
         this.logger = logger;
         this.fileManager = fileManager;
         this.languageFileDiscovery = languageFileDiscovery;
+        this.metadataStore = metadataStore;
         this.userPreferencesOptions = userPreferencesOptions.Value;
         this.urlMetadataOptions = urlMetadataOptions.Value;
 
@@ -63,6 +66,14 @@ public class LanguageFileUpdater
         var versionUri = Constants.HTTPS_STRING_PROTOCOL_HEADER + urlMetadataOptions.VersionUrl;
         var version = await GetVersion(versionUri).ConfigureAwait(false);
 
+        if (await metadataStore.MatchesCurrentFile(languageToReplace, version).ConfigureAwait(false))
+        {
+            logger.LogInformation("Skipping language update. {file} already matches target version {version}.",
+                languageToReplace.FullPath,
+                version);
+            return LanguageUpdateResult.Skipped(languageToReplace);
+        }
+
         var downloadedFileUri = Constants.HTTPS_LOCALIZATION_PROTOCOL_HEADER +
                             urlMetadataOptions.FileUrl.Replace(urlMetadataOptions.StringToReplaceOnUrl, version);
         var localFileUri = Constants.LOCAL_LOCALIZATION_PROTOCOL_HEADER + languageToReplace.FullPath;
@@ -73,6 +84,15 @@ public class LanguageFileUpdater
         var finalFileContent = DictionaryUtils.Merge(downloadedFileContent.Data, localFileContent.Data);
 
         await fileManager.Write(localFileUri, finalFileContent).ConfigureAwait(false);
+
+        try
+        {
+            await metadataStore.Write(languageToReplace, version).ConfigureAwait(false);
+        }
+        catch (Exception exception)
+        {
+            logger.LogWarning(exception, "Could not write language update metadata for {file}.", languageToReplace.FullPath);
+        }
 
         return LanguageUpdateResult.Success(languageToReplace);
     }

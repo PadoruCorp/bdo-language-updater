@@ -17,6 +17,16 @@ public sealed record LanguageUpdateResult(
             sourceLanguage.FullPath);
     }
 
+    public static LanguageUpdateResult Skipped(GameLanguageFile sourceLanguage)
+    {
+        return new LanguageUpdateResult(
+            true,
+            $"{sourceLanguage.DisplayName} already contains the latest official English localization. No update was needed.",
+            sourceLanguage.Code,
+            Constants.DEFAULT_TARGET_LANGUAGE_CODE,
+            sourceLanguage.FullPath);
+    }
+
     public static LanguageUpdateResult Failure(string message, string sourceLanguageCode = "")
     {
         return new LanguageUpdateResult(

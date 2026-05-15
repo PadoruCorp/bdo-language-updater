@@ -3,7 +3,6 @@ using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Avalonia.Media.Imaging;
-using BDOLanguageUpdater.Service;
 using BDOLanguageUpdater.WPF.Views;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -19,10 +18,7 @@ public class App : Application
 
     public App()
     {
-        this.host = Host.CreateDefaultBuilder()
-            .UseSerilog()
-            .ConfigureServices((context, services) => { context.RegisterServices(services); })
-            .Build();
+        this.host = ApplicationHost.Create();
     }
 
     public override void Initialize()
