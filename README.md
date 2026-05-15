@@ -4,6 +4,8 @@ BDO Language Updater is a desktop app that replaces one installed Black Desert O
 
 This is useful when your server region does not expose English in the game settings. For example, South America normally offers Spanish and Portuguese, but not English. The app detects the installed `languagedata_*.loc` files and lets you choose which one should be replaced with English.
 
+<img width="840" height="633" alt="image" src="https://github.com/user-attachments/assets/bd2b0c16-5ca0-4c70-8202-7fdb5f97c88c" />
+
 ## Download
 
 Download the latest build from [GitHub Releases](https://github.com/PadoruCorp/bdo-language-updater/releases).
