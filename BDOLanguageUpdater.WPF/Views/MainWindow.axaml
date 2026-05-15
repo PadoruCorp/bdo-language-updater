@@ -132,7 +132,6 @@
                     <Border Classes="Panel">
                         <StackPanel Spacing="10">
                             <ToggleSwitch Content="Hide to tray on close" IsChecked="{Binding HideToTrayOnClose}"/>
-                            <ToggleSwitch Content="Open on startup" IsChecked="{Binding OpenOnStartup}"/>
                         </StackPanel>
                     </Border>
                 </StackPanel>

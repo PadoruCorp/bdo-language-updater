@@ -16,7 +16,6 @@ public partial class MainWindow : Window
     private readonly MainWindowViewModel viewModel;
     private readonly IWritableOptions<UserPreferencesOptions> userPreferencesOptions;
     private readonly LanguageUpdaterService languageUpdaterService;
-    private readonly StartupHelper startupHelper;
 
     public bool ExitingFromTray { get; set; } = false;
 
@@ -25,8 +24,7 @@ public partial class MainWindow : Window
         LanguageFileDiscovery languageFileDiscovery,
         LanguageFileWatcher watcher,
         IWritableOptions<UserPreferencesOptions> userPreferencesOptions,
-        LanguageUpdaterService languageUpdaterService,
-        StartupHelper startupHelper)
+        LanguageUpdaterService languageUpdaterService)
     {
         InitializeComponent();
 
@@ -37,17 +35,14 @@ public partial class MainWindow : Window
         this.viewModel = viewModel;
         this.userPreferencesOptions = userPreferencesOptions;
         this.languageUpdaterService = languageUpdaterService;
-        this.startupHelper = startupHelper;
 
         viewModel.GeneralTabViewModel.BDOPath = userPreferencesOptions.Value.BDOClientPath;
         viewModel.AdvancedTabViewModel.HideToTrayOnClose = userPreferencesOptions.Value.HideToTrayOnClose;
-        viewModel.AdvancedTabViewModel.OpenOnStartup = userPreferencesOptions.Value.OpenOnStartup;
 
         RefreshAvailableLanguages(persistSelectedLanguage: false);
 
         viewModel.GeneralTabViewModel.ObservableForProperty(vm => vm.SelectedLanguage).Subscribe(LanguageSelectionChanged);
         viewModel.AdvancedTabViewModel.ObservableForProperty(vm => vm.HideToTrayOnClose).Subscribe(HideToTrayOnCloseChanged);
-        viewModel.AdvancedTabViewModel.ObservableForProperty(vm => vm.OpenOnStartup).Subscribe(OpenOnStartupChanged);
     }
 
     private void LanguageSelectionChanged(IObservedChange<GeneralTabViewModel, GameLanguageFile?> obj)
@@ -65,13 +60,6 @@ public partial class MainWindow : Window
     private void HideToTrayOnCloseChanged(IObservedChange<AdvancedTabViewModel, bool> obj)
     {
         userPreferencesOptions.Update(options => { options.HideToTrayOnClose = obj.Value; });
-    }
-
-    private void OpenOnStartupChanged(IObservedChange<AdvancedTabViewModel, bool> obj)
-    {
-        userPreferencesOptions.Update(options => { options.OpenOnStartup = obj.Value; });
-
-        startupHelper.SetStartupOnBoot(obj.Value);
     }
 
     private async void Browse(object sender, RoutedEventArgs args)

@@ -13,8 +13,6 @@ namespace BDOLanguageUpdater.WPF;
 
 public class App : Application
 {
-    public const string INITIALIZE_ON_TRAY_ARG = "--background";
-
     private readonly IHost host;
     private IClassicDesktopStyleApplicationLifetime? desktop;
     private Window? myMainWindow;
@@ -40,7 +38,8 @@ public class App : Application
         {
             this.desktop = desktop;
 
-            SetupMainWindow(desktop.Args);
+            Desktop.ShutdownMode = ShutdownMode.OnLastWindowClose;
+            InitMainWindow();
 
             RegisterTrayIcon();
         }
@@ -80,20 +79,6 @@ public class App : Application
         };
 
         SetValue(TrayIcon.IconsProperty, trayIcons);
-    }
-
-    private void SetupMainWindow(string[]? args)
-    {
-        Desktop.ShutdownMode = ShutdownMode.OnLastWindowClose;
-
-        var hasToShowWindow = args is null ||
-                              args.Length <= 0 ||
-                              !string.Equals(args[0], INITIALIZE_ON_TRAY_ARG, StringComparison.OrdinalIgnoreCase);
-
-        if (hasToShowWindow)
-        {
-            InitMainWindow();
-        }
     }
 
     private void ShowApplication()

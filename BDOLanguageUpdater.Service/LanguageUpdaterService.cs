@@ -13,10 +13,6 @@ public class LanguageUpdaterService : BackgroundService
     private readonly LanguageFileWatcher watcher;
     private readonly IServiceProvider serviceProvider;
 
-    public event Action? OnFileUpdateStart;
-    public event Action? OnFileUpdateFinish;
-    public event Action<LanguageUpdateResult>? OnFileUpdateComplete;
-
     public LanguageUpdaterService(ILogger<LanguageUpdaterService> logger,
                   LanguageFileWatcher watcher,
                   IServiceProvider serviceProvider)
@@ -30,7 +26,6 @@ public class LanguageUpdaterService : BackgroundService
 
     public async Task<LanguageUpdateResult> UpdateLanguage(string? languageCodeToReplace = null)
     {
-        OnFileUpdateStart?.Invoke();
         watcher.OnFileChanged -= OnFileChanged;
         
         logger.LogInformation("Updating file: {time}", DateTimeOffset.Now);
@@ -55,13 +50,6 @@ public class LanguageUpdaterService : BackgroundService
         }
 
         logger.LogInformation("File update completed: {time}", DateTimeOffset.Now);
-
-        if (result.Succeeded)
-        {
-            OnFileUpdateFinish?.Invoke();
-        }
-
-        OnFileUpdateComplete?.Invoke(result);
 
         return result;
     }

@@ -16,9 +16,5 @@ public static class HostBuilderContextExtensions
         // UI
         services.AddSingleton<MainWindow>();
         services.AddSingleton<MainWindowViewModel>();
-
-        services.AddSingleton<StartupHelper>();
-
-        services.AddHostedService<NotificationsManager>();
     }
 }

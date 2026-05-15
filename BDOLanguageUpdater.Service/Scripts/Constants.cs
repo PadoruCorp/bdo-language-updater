@@ -17,7 +17,6 @@ public class Constants
     public const string DEFAULT_TARGET_LANGUAGE_CODE = "en";
     public const string DEFAULT_LANGUAGE_CODE_TO_REPLACE = "es";
     public const bool DEFAULT_MINIMIZE_TO_TRAY = true;
-    public const bool DEFAULT_OPEN_ON_STARTUP = false;
 
     // Localization file
     public const string BLACK_DESERT_LANGUAGE_FILES_PATH = "ads";

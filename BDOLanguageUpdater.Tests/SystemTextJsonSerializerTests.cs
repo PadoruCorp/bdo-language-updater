@@ -39,8 +39,7 @@ public sealed class SystemTextJsonSerializerTests
                   "UserPreferences": {
                     "BDOClientPath": "C:\\BDO",
                     "LanguageCodeToReplace": "es",
-                    "HideToTrayOnClose": true,
-                    "OpenOnStartup": false
+                    "HideToTrayOnClose": true
                   },
                   "Logging": {
                     "LogLevel": {
@@ -60,7 +59,6 @@ public sealed class SystemTextJsonSerializerTests
             writableOptions.Update(options =>
             {
                 options.LanguageCodeToReplace = "pt";
-                options.OpenOnStartup = true;
             });
 
             var json = JsonNode.Parse(File.ReadAllText(settingsPath))!.AsObject();
@@ -70,7 +68,6 @@ public sealed class SystemTextJsonSerializerTests
             Assert.Equal("C:\\BDO", userPreferences["BDOClientPath"]!.GetValue<string>());
             Assert.Equal("pt", userPreferences["LanguageCodeToReplace"]!.GetValue<string>());
             Assert.True(userPreferences["HideToTrayOnClose"]!.GetValue<bool>());
-            Assert.True(userPreferences["OpenOnStartup"]!.GetValue<bool>());
             Assert.Equal("Information", logging["LogLevel"]!["Default"]!.GetValue<string>());
         }
         finally
