@@ -10,6 +10,7 @@ class Program
 {
     private const string UpdateArgument = "--update";
     private const string UpdateAndLaunchArgument = "--update-and-launch";
+    private const string RestoreBackupArgument = "--restore-backup";
     private const string QuietArgument = "--quiet";
     private const string LanguageArgumentPrefix = "--language=";
     private const string LaunchModeArgumentPrefix = "--launch=";
@@ -26,6 +27,13 @@ class Program
         {
             return RunHeadlessUpdate(args, launchAfterUpdate:
                     args.Contains(UpdateAndLaunchArgument, StringComparer.OrdinalIgnoreCase))
+                .GetAwaiter()
+                .GetResult();
+        }
+
+        if (args.Contains(RestoreBackupArgument, StringComparer.OrdinalIgnoreCase))
+        {
+            return RunHeadlessRestore(args)
                 .GetAwaiter()
                 .GetResult();
         }
@@ -122,5 +130,32 @@ class Program
         }
 
         return GameLaunchResult.Failure($"Unknown launch mode '{launchMode}'. Use 'steam' or 'launcher'.");
+    }
+
+    private static async Task<int> RunHeadlessRestore(string[] args)
+    {
+        var quiet = args.Contains(QuietArgument, StringComparer.OrdinalIgnoreCase);
+        var languageCode = args.FirstOrDefault(arg => arg.StartsWith(LanguageArgumentPrefix, StringComparison.OrdinalIgnoreCase))
+            ?.Substring(LanguageArgumentPrefix.Length);
+
+        using var host = ApplicationHost.Create(args);
+        await host.StartAsync().ConfigureAwait(false);
+
+        try
+        {
+            var languageUpdaterService = host.Services.GetRequiredService<LanguageUpdaterService>();
+            var result = await languageUpdaterService.RestoreLanguageBackup(languageCode).ConfigureAwait(false);
+
+            if (!quiet)
+            {
+                Console.WriteLine(result.Message);
+            }
+
+            return result.Succeeded ? 0 : 1;
+        }
+        finally
+        {
+            await host.StopAsync().ConfigureAwait(false);
+        }
     }
 }

@@ -17,6 +17,7 @@ public partial class MainWindow : Window
     private readonly LanguageUpdaterService languageUpdaterService;
     private readonly AutoRepairScheduler autoRepairScheduler;
     private readonly GameLauncher gameLauncher;
+    private readonly LanguageFileBackupStore backupStore;
     private bool suppressAutoRepairUpdates;
 
     public bool ExitingFromTray { get; set; } = false;
@@ -27,7 +28,8 @@ public partial class MainWindow : Window
         IWritableOptions<UserPreferencesOptions> userPreferencesOptions,
         LanguageUpdaterService languageUpdaterService,
         AutoRepairScheduler autoRepairScheduler,
-        GameLauncher gameLauncher)
+        GameLauncher gameLauncher,
+        LanguageFileBackupStore backupStore)
     {
         InitializeComponent();
 
@@ -39,6 +41,7 @@ public partial class MainWindow : Window
         this.languageUpdaterService = languageUpdaterService;
         this.autoRepairScheduler = autoRepairScheduler;
         this.gameLauncher = gameLauncher;
+        this.backupStore = backupStore;
 
         viewModel.GeneralTabViewModel.BDOPath = userPreferencesOptions.Value.BDOClientPath;
         viewModel.AdvancedTabViewModel.HideToTrayOnClose = userPreferencesOptions.Value.HideToTrayOnClose;
@@ -68,6 +71,7 @@ public partial class MainWindow : Window
         }
 
         userPreferencesOptions.Update(options => { options.LanguageCodeToReplace = obj.Value.Code; });
+        UpdateSelectedLanguageBackupAvailability();
         viewModel.GeneralTabViewModel.StatusMessage =
             $"{obj.Value.DisplayName} will be replaced with the latest official English localization.";
     }
@@ -172,6 +176,33 @@ public partial class MainWindow : Window
         await UpdateSelectedLanguage(GameLaunchMode.None);
     }
 
+    private async void RestoreBackup(object sender, RoutedEventArgs args)
+    {
+        var general = viewModel.GeneralTabViewModel;
+        if (general.SelectedLanguage is null)
+        {
+            general.StatusMessage = "Choose one detected installed language before restoring a backup.";
+            return;
+        }
+
+        var selectedLanguageCode = general.SelectedLanguage.Code;
+        var selectedLanguageName = general.SelectedLanguage.DisplayName;
+
+        general.IsUpdating = true;
+        general.StatusMessage = $"Restoring the backed up {selectedLanguageName} file.";
+
+        try
+        {
+            var result = await Task.Run(() => languageUpdaterService.RestoreLanguageBackup(selectedLanguageCode));
+            general.StatusMessage = result.Message;
+        }
+        finally
+        {
+            UpdateSelectedLanguageBackupAvailability();
+            general.IsUpdating = false;
+        }
+    }
+
     private async void UpdateAndLaunchSteam(object sender, RoutedEventArgs args)
     {
         await UpdateSelectedLanguage(GameLaunchMode.Steam);
@@ -207,6 +238,7 @@ public partial class MainWindow : Window
         {
             var result = await Task.Run(() => languageUpdaterService.UpdateLanguage(selectedLanguageCode));
             general.StatusMessage = result.Message;
+            UpdateSelectedLanguageBackupAvailability();
 
             if (!result.Succeeded || !launchAfterUpdate)
             {
@@ -236,6 +268,7 @@ public partial class MainWindow : Window
         var languages = languageFileDiscovery.GetAvailableLanguages(general.BDOPath);
 
         general.SetAvailableLanguages(languages, preferredLanguageCode);
+        UpdateSelectedLanguageBackupAvailability();
 
         if (general.SelectedLanguage is not null)
         {
@@ -250,6 +283,7 @@ public partial class MainWindow : Window
             return;
         }
 
+        general.SetSelectedLanguageBackupAvailability(false);
         var adsPath = languageFileDiscovery.GetAdsPath(general.BDOPath);
         general.StatusMessage = Directory.Exists(adsPath)
             ? $"No replaceable language files were found in '{adsPath}'. Expected languagedata_*.loc files other than English."
@@ -305,6 +339,13 @@ public partial class MainWindow : Window
         return Enum.TryParse<DayOfWeek>(value, ignoreCase: true, out var day)
             ? day
             : DayOfWeek.Thursday;
+    }
+
+    private void UpdateSelectedLanguageBackupAvailability()
+    {
+        var selectedLanguage = viewModel.GeneralTabViewModel.SelectedLanguage;
+        viewModel.GeneralTabViewModel.SetSelectedLanguageBackupAvailability(
+            selectedLanguage is not null && backupStore.HasBackup(selectedLanguage));
     }
 
     private enum GameLaunchMode

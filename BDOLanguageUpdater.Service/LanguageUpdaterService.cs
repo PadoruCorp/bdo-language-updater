@@ -38,4 +38,28 @@ public class LanguageUpdaterService
 
         return result;
     }
+
+    public async Task<LanguageBackupRestoreResult> RestoreLanguageBackup(string? languageCodeToReplace = null)
+    {
+        logger.LogInformation("Restoring language backup: {time}", DateTimeOffset.Now);
+
+        LanguageBackupRestoreResult result;
+        try
+        {
+            await using var scope = serviceProvider.CreateAsyncScope();
+
+            var fileUpdater = scope.ServiceProvider.GetRequiredService<LanguageFileUpdater>();
+
+            result = await fileUpdater.RestoreBackup(languageCodeToReplace).ConfigureAwait(false);
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "Could not restore language backup.");
+            result = LanguageBackupRestoreResult.Failure($"Could not restore the language backup: {exception.Message}");
+        }
+
+        logger.LogInformation("Language backup restore completed: {time}", DateTimeOffset.Now);
+
+        return result;
+    }
 }

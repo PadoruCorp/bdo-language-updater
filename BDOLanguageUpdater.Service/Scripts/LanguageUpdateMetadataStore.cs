@@ -16,18 +16,24 @@ public sealed class LanguageUpdateMetadataStore
     public async Task<bool> MatchesCurrentFile(GameLanguageFile languageFile, string targetVersion)
     {
         var metadata = await Read(languageFile).ConfigureAwait(false);
-        if (metadata is null ||
-            metadata.Version != CurrentMetadataVersion ||
-            !metadata.SourceLanguageCode.Equals(languageFile.Code, StringComparison.OrdinalIgnoreCase) ||
-            !metadata.TargetLanguageCode.Equals(Constants.DEFAULT_TARGET_LANGUAGE_CODE, StringComparison.OrdinalIgnoreCase) ||
-            !metadata.TargetVersion.Equals(targetVersion, StringComparison.OrdinalIgnoreCase) ||
-            !File.Exists(languageFile.FullPath))
+        if (!IsValidForLanguage(metadata, languageFile) ||
+            !metadata!.TargetVersion.Equals(targetVersion, StringComparison.OrdinalIgnoreCase))
         {
             return false;
         }
 
-        var currentFileHash = await ComputeSha256(languageFile.FullPath).ConfigureAwait(false);
-        return currentFileHash.Equals(metadata.OutputSha256, StringComparison.OrdinalIgnoreCase);
+        return await MatchesCurrentOutputHash(languageFile, metadata).ConfigureAwait(false);
+    }
+
+    public async Task<bool> MatchesCurrentOutput(GameLanguageFile languageFile)
+    {
+        var metadata = await Read(languageFile).ConfigureAwait(false);
+        if (!IsValidForLanguage(metadata, languageFile))
+        {
+            return false;
+        }
+
+        return await MatchesCurrentOutputHash(languageFile, metadata!).ConfigureAwait(false);
     }
 
     public async Task Write(GameLanguageFile languageFile, string targetVersion)
@@ -68,6 +74,32 @@ public sealed class LanguageUpdateMetadataStore
     public string GetMetadataPath(GameLanguageFile languageFile)
     {
         return languageFile.FullPath + MetadataFileSuffix;
+    }
+
+    public Task Delete(GameLanguageFile languageFile)
+    {
+        var metadataPath = GetMetadataPath(languageFile);
+        if (File.Exists(metadataPath))
+        {
+            File.Delete(metadataPath);
+        }
+
+        return Task.CompletedTask;
+    }
+
+    private static bool IsValidForLanguage(LanguageUpdateMetadata? metadata, GameLanguageFile languageFile)
+    {
+        return metadata is not null &&
+               metadata.Version == CurrentMetadataVersion &&
+               metadata.SourceLanguageCode.Equals(languageFile.Code, StringComparison.OrdinalIgnoreCase) &&
+               metadata.TargetLanguageCode.Equals(Constants.DEFAULT_TARGET_LANGUAGE_CODE, StringComparison.OrdinalIgnoreCase) &&
+               File.Exists(languageFile.FullPath);
+    }
+
+    private static async Task<bool> MatchesCurrentOutputHash(GameLanguageFile languageFile, LanguageUpdateMetadata metadata)
+    {
+        var currentFileHash = await ComputeSha256(languageFile.FullPath).ConfigureAwait(false);
+        return currentFileHash.Equals(metadata.OutputSha256, StringComparison.OrdinalIgnoreCase);
     }
 
     private static async Task<string> ComputeSha256(string path)

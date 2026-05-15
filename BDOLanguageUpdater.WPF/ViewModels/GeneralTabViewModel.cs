@@ -10,6 +10,7 @@ public class GeneralTabViewModel : ReactiveObject
     private GameLanguageFile? _selectedLanguage;
     private string _statusMessage = "Select your Black Desert Online folder, scan installed languages, then replace one with English.";
     private bool _isUpdating;
+    private bool _hasSelectedLanguageBackup;
 
     public string BDOPath
     {
@@ -31,6 +32,7 @@ public class GeneralTabViewModel : ReactiveObject
             _selectedLanguage = value;
             this.RaisePropertyChanged();
             this.RaisePropertyChanged(nameof(CanUpdate));
+            this.RaisePropertyChanged(nameof(CanRestoreBackup));
             this.RaisePropertyChanged(nameof(SelectedLanguageDescription));
         }
     }
@@ -53,12 +55,26 @@ public class GeneralTabViewModel : ReactiveObject
             _isUpdating = value;
             this.RaisePropertyChanged();
             this.RaisePropertyChanged(nameof(CanUpdate));
+            this.RaisePropertyChanged(nameof(CanRestoreBackup));
         }
     }
 
     public bool HasAvailableLanguages => AvailableLanguages.Count > 0;
 
     public bool CanUpdate => HasAvailableLanguages && SelectedLanguage is not null && !IsUpdating;
+
+    public bool HasSelectedLanguageBackup
+    {
+        get => _hasSelectedLanguageBackup;
+        private set
+        {
+            _hasSelectedLanguageBackup = value;
+            this.RaisePropertyChanged();
+            this.RaisePropertyChanged(nameof(CanRestoreBackup));
+        }
+    }
+
+    public bool CanRestoreBackup => SelectedLanguage is not null && HasSelectedLanguageBackup && !IsUpdating;
 
     public string TargetLanguageDescription => "English (en)";
 
@@ -79,5 +95,10 @@ public class GeneralTabViewModel : ReactiveObject
 
         this.RaisePropertyChanged(nameof(HasAvailableLanguages));
         this.RaisePropertyChanged(nameof(CanUpdate));
+    }
+
+    public void SetSelectedLanguageBackupAvailability(bool hasBackup)
+    {
+        HasSelectedLanguageBackup = hasBackup;
     }
 }

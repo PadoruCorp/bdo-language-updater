@@ -104,6 +104,12 @@
                                                   HorizontalAlignment="Stretch"
                                                   PlaceholderText="No languages found"/>
                                         <TextBlock Text="{Binding SelectedLanguageDescription}" Opacity="0.72"/>
+                                        <Button Content="Restore Backup"
+                                                Click="RestoreBackup"
+                                                IsEnabled="{Binding CanRestoreBackup}"
+                                                Classes="Secondary"
+                                                HorizontalAlignment="Left"
+                                                Padding="18,9"/>
                                     </StackPanel>
 
                                     <TextBlock Grid.Column="1"

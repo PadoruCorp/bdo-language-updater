@@ -17,6 +17,7 @@ public static class HostBuilderExtensions
         services.AddSingleton<LanguageUpdaterService>();
         services.AddSingleton<LanguageFileDiscovery>();
         services.AddSingleton<LanguageUpdateMetadataStore>();
+        services.AddSingleton<LanguageFileBackupStore>();
         services.AddScoped<LanguageFileUpdater>();
 
         // Options
