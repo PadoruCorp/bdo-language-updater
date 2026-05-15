@@ -46,6 +46,11 @@ namespace Padoru.Core.Files
             {
                 throw new ArgumentException("The provided uri is null or empty");
             }
+
+            if (value is null)
+            {
+                throw new ArgumentNullException(nameof(value));
+            }
                 
             var bytes = await serializer.Serialize(value).ConfigureAwait(false);
 

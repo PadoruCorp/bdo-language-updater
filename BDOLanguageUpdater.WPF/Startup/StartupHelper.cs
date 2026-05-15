@@ -23,7 +23,8 @@ public class StartupHelper
     public void SetStartupOnBoot(bool enable)
     {
         var appExePath = Assembly.GetEntryAssembly()!.Location.Replace(".dll", ".exe");
-        var appFolder = Path.GetDirectoryName(appExePath);
+        var appFolder = Path.GetDirectoryName(appExePath)
+                        ?? throw new InvalidOperationException("Could not resolve the application folder.");
         var shortcutPath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.CommonStartup),
             Assembly.GetExecutingAssembly().GetName().Name + ".lnk");

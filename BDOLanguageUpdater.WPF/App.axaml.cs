@@ -16,7 +16,7 @@ public class App : Application
     public const string INITIALIZE_ON_TRAY_ARG = "--background";
 
     private readonly IHost host;
-    private IClassicDesktopStyleApplicationLifetime desktop;
+    private IClassicDesktopStyleApplicationLifetime? desktop;
     private Window? myMainWindow;
 
     public App()
@@ -82,12 +82,13 @@ public class App : Application
         SetValue(TrayIcon.IconsProperty, trayIcons);
     }
 
-    private void SetupMainWindow(string[] args)
+    private void SetupMainWindow(string[]? args)
     {
-        desktop.ShutdownMode = ShutdownMode.OnLastWindowClose;
+        Desktop.ShutdownMode = ShutdownMode.OnLastWindowClose;
 
-        var hasToShowWindow = args.Length <= 0 ||
-                              !args[0].ToLower().Equals(INITIALIZE_ON_TRAY_ARG.ToLower());
+        var hasToShowWindow = args is null ||
+                              args.Length <= 0 ||
+                              !string.Equals(args[0], INITIALIZE_ON_TRAY_ARG, StringComparison.OrdinalIgnoreCase);
 
         if (hasToShowWindow)
         {
@@ -102,21 +103,27 @@ public class App : Application
             InitMainWindow();
         }
 
-        myMainWindow.WindowState = WindowState.Normal;
-        myMainWindow.Show();
+        var mainWindow = myMainWindow ?? throw new InvalidOperationException("Main window could not be created.");
+        mainWindow.WindowState = WindowState.Normal;
+        mainWindow.Show();
     }
 
     private void CloseApplication()
     {
-        var mainWindow = (MainWindow)myMainWindow!;
-        
-        mainWindow.ExitingFromTray = true;
-        myMainWindow?.Close();
+        if (myMainWindow is MainWindow mainWindow)
+        {
+            mainWindow.ExitingFromTray = true;
+            mainWindow.Close();
+        }
     }
 
     private void InitMainWindow()
     {
-        desktop.MainWindow = host.Services.GetService<MainWindow>();
-        myMainWindow = desktop.MainWindow;
+        var mainWindow = host.Services.GetRequiredService<MainWindow>();
+        Desktop.MainWindow = mainWindow;
+        myMainWindow = mainWindow;
     }
+
+    private IClassicDesktopStyleApplicationLifetime Desktop =>
+        desktop ?? throw new InvalidOperationException("The desktop application lifetime is not available.");
 }

@@ -1,42 +1,40 @@
-﻿using System;
-using System.Text;
+using System;
+using System.Text.Json;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
+using SystemJsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace Padoru.Core.Files
 {
     public class JsonSerializer : ISerializer
     {
-        private readonly JsonSerializerSettings settings;
+        private readonly JsonSerializerOptions options;
 
         public JsonSerializer()
         {
-            settings = new JsonSerializerSettings()
+            options = new JsonSerializerOptions
             {
-                Formatting = Formatting.Indented,
+                WriteIndented = true,
+                PropertyNameCaseInsensitive = true,
             };
         }
-        
-        public JsonSerializer(JsonSerializerSettings settings)
+
+        public JsonSerializer(JsonSerializerOptions options)
         {
-            this.settings = settings;
+            this.options = options;
         }
 
         public Task<byte[]> Serialize(object value)
         {
-            var text = JsonConvert.SerializeObject(value, settings);
-            
-            var bytes = Encoding.UTF8.GetBytes(text);
-            
+            var bytes = SystemJsonSerializer.SerializeToUtf8Bytes(value, value.GetType(), options);
+
             return Task.FromResult(bytes);
         }
 
         public Task<object> Deserialize(Type type, byte[] bytes, string uri)
         {
-            var text = Encoding.UTF8.GetString(bytes);
-            
-            var value = JsonConvert.DeserializeObject(text, type, settings);
-            
+            var value = SystemJsonSerializer.Deserialize(bytes, type, options)
+                        ?? throw new InvalidOperationException($"Could not deserialize '{uri}' as {type.Name}.");
+
             return Task.FromResult(value);
         }
     }

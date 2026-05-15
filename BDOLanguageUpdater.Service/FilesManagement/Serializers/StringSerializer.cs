@@ -8,7 +8,7 @@ namespace Padoru.Core.Files
     {
         public Task<byte[]> Serialize(object value)
         {
-            var bytes = Encoding.UTF8.GetBytes(value.ToString());
+            var bytes = Encoding.UTF8.GetBytes(value.ToString() ?? string.Empty);
             
             return Task.FromResult(bytes);
         }

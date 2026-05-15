@@ -1,14 +1,20 @@
-﻿using System;
+using System;
 using System.IO;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace BDOLanguageUpdater.Service;
 
 public class WritableOptions<T> : IWritableOptions<T> where T : class, new()
 {
+    private static readonly JsonSerializerOptions SerializerOptions = new()
+    {
+        WriteIndented = true,
+        PropertyNameCaseInsensitive = true,
+    };
+
     private readonly IHostEnvironment _environment;
     private readonly IOptionsMonitor<T> _options;
     private readonly string _section;
@@ -35,17 +41,18 @@ public class WritableOptions<T> : IWritableOptions<T> where T : class, new()
         var fileInfo = fileProvider.GetFileInfo(_file);
         var physicalPath = fileInfo.PhysicalPath;
         if (physicalPath == null) throw new InvalidOperationException();
-        
-        var jObject = JsonConvert.DeserializeObject<JObject>(File.ReadAllText(physicalPath));
-        if (jObject == null) throw new InvalidOperationException();
-        
-        var sectionObject = jObject.TryGetValue(_section, out var section) ?
-            JsonConvert.DeserializeObject<T>(section.ToString()) : Value;
+
+        var jsonObject = JsonNode.Parse(File.ReadAllText(physicalPath)) as JsonObject;
+        if (jsonObject == null) throw new InvalidOperationException();
+
+        var sectionObject = jsonObject.TryGetPropertyValue(_section, out var section) && section is not null
+            ? section.Deserialize<T>(SerializerOptions)
+            : Value;
         if (sectionObject == null) throw new InvalidOperationException();
-        
+
         applyChanges(sectionObject);
 
-        jObject[_section] = JObject.Parse(JsonConvert.SerializeObject(sectionObject));
-        File.WriteAllText(physicalPath, JsonConvert.SerializeObject(jObject, Formatting.Indented));
+        jsonObject[_section] = JsonSerializer.SerializeToNode(sectionObject, SerializerOptions);
+        File.WriteAllText(physicalPath, jsonObject.ToJsonString(SerializerOptions));
     }
 }

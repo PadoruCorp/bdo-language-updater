@@ -39,7 +39,7 @@ namespace Padoru.Core.Files
 
         public void RegisterProtocol(string protocolHeader, IProtocol protocol)
         {
-            if (!protocolRegex.IsMatch(protocolHeader ?? string.Empty))
+            if (string.IsNullOrEmpty(protocolHeader) || !protocolRegex.IsMatch(protocolHeader))
             {
                 throw new Exception($"Invalid protocol '{protocolHeader}'. Only word characters allowed.");
             }

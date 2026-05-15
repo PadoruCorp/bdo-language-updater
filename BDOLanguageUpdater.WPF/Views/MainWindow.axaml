@@ -64,7 +64,7 @@
                                 <Grid RowDefinitions="Auto,Auto">
                                     <TextBlock Classes="Label" Text="Black Desert Online folder"/>
                                     <Grid Grid.Row="1" ColumnDefinitions="*,Auto,Auto" Margin="0,8,0,0">
-                                        <TextBox Text="{Binding BDOPath}" IsReadOnly="True" Watermark="Select the Black Desert Online folder"/>
+                                        <TextBox Text="{Binding BDOPath}" IsReadOnly="True" PlaceholderText="Select the Black Desert Online folder"/>
                                         <Button Grid.Column="1" Content="Browse" Click="Browse" Margin="8,0,0,0"/>
                                         <Button Grid.Column="2" Content="Scan" Click="ScanLanguages" Margin="8,0,0,0"/>
                                     </Grid>
