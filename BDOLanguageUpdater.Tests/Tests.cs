@@ -18,7 +18,8 @@ public class Tests : BaseHostTests
     public async Task LanguageFileUpdater_GetVersion_ShouldReturnValid()
     {
         // Arrange
-        var languageFileUpdater = this.ServiceProvider!.GetRequiredService<LanguageFileUpdater>();
+        await using var scope = this.ServiceProvider!.CreateAsyncScope();
+        var languageFileUpdater = scope.ServiceProvider.GetRequiredService<LanguageFileUpdater>();
         var versionUri = Constants.HTTPS_STRING_PROTOCOL_HEADER + Constants.DEFAULT_VERSION_URL;
 
         // Act
@@ -32,7 +33,8 @@ public class Tests : BaseHostTests
     public async Task LanguageFileUpdater_UpdateFile_ShouldUpdateFile()
     {
         // Arrange
-        var languageFileUpdater = this.ServiceProvider!.GetRequiredService<LanguageFileUpdater>();
+        await using var scope = this.ServiceProvider!.CreateAsyncScope();
+        var languageFileUpdater = scope.ServiceProvider.GetRequiredService<LanguageFileUpdater>();
 
         // Act
         var exception = await Record.ExceptionAsync(languageFileUpdater.UpdateFile);

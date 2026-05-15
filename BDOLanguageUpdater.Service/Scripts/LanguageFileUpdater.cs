@@ -46,12 +46,10 @@ public class LanguageFileUpdater
         var localFileUri = Constants.LOCAL_LOCALIZATION_PROTOCOL_HEADER + Path.Combine(blackDesertFilesPath,
             Constants.BLACK_DESERT_LANGUAGE_FILE_NAME.Replace(Constants.DEFAULT_STRING_TO_REPLACE_ON_FILE, "es"));
 
-        var downloadedFileContent = fileManager.Read<string>(downloadedFileUri);
-        var localFileContent = fileManager.Read<string>(localFileUri);
+        var downloadedFileContent = await fileManager.Read<string>(downloadedFileUri);
+        var localFileContent = await fileManager.Read<string>(localFileUri);
 
-        await Task.WhenAll(downloadedFileContent, localFileContent);
-
-        var finalFileContent = DictionaryUtils.Merge(downloadedFileContent.Result.Data, localFileContent.Result.Data);
+        var finalFileContent = DictionaryUtils.Merge(downloadedFileContent.Data, localFileContent.Data);
 
         await fileManager.Write(localFileUri, finalFileContent);
     }

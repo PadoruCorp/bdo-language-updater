@@ -13,12 +13,12 @@ public class LanguageFileWatcher
     public Action? OnFileChanged;
     private readonly Stopwatch stopwatch;
 
-    public LanguageFileWatcher(ILogger<LanguageUpdaterService> logger, IOptionsSnapshot<UserPreferencesOptions> userPreferencesOptions)
+    public LanguageFileWatcher(ILogger<LanguageUpdaterService> logger, IOptionsMonitor<UserPreferencesOptions> userPreferencesOptions)
     {
         this.logger = logger;
         stopwatch = Stopwatch.StartNew();
 
-        var path = Path.Combine(userPreferencesOptions.Value.BDOClientPath, Constants.BLACK_DESERT_LANGUAGE_FILES_PATH);
+        var path = Path.Combine(userPreferencesOptions.CurrentValue.BDOClientPath, Constants.BLACK_DESERT_LANGUAGE_FILES_PATH);
         SetPath(path);
     }
 
